@@ -29,7 +29,7 @@ export default function Page() {
         ))}
       </div>
 
-      <div className="flex justify-center pt-8 border-t">
+      <div className="flex justify-center pt-2 border-t">
         <Button onClick={() => addSection("새로운 섹션")} className="gap-2">
           <Plus className="h-4 w-4" />
           섹션 추가
