@@ -29,7 +29,7 @@ export default function RootLayout({
           </main>
           <footer className="border-t border-foreground py-2 text-[12px] w-full">
             <div className="flex justify-end w-full mx-auto">
-              <p>만돌린의 리카이시스의 사랑으로 만들어짐.</p>
+              <p>만돌린 리카이시스의 사랑으로 만들어짐.</p>
             </div>
           </footer>
         </div>
