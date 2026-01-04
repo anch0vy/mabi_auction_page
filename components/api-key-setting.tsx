@@ -33,11 +33,11 @@ export function ApiKeySetting() {
             <p style={{transform: "translateY(2px)"}}>API 설정</p>
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>API 키 관리</DialogTitle>
+      <DialogContent className="max-w-100 border-foreground border p-0" showCloseButton={false}>
+        <DialogHeader className="border-foreground border-b p-2">
+          <DialogTitle style={{transform: "translateY(2px)"}}>API 키 관리</DialogTitle>
         </DialogHeader>
-        <div className="grid gap-4 py-4 max-h-[60vh] overflow-y-auto pr-2">
+        <div className="grid gap-4 py-4 max-h-[60vh] overflow-y-hidden pr-2">
           {apiKeys.map((key, index) => (
             <div key={index} className="flex items-center gap-2">
               <Input
@@ -50,7 +50,7 @@ export function ApiKeySetting() {
                 size="icon"
                 onClick={() => removeApiKey(index)}
                 disabled={apiKeys.length <= 1}
-                className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                className="h-8 w-8"
               >
                 <Trash2 className="h-4 w-4" />
               </Button>
@@ -59,18 +59,12 @@ export function ApiKeySetting() {
           <Button
             variant="outline"
             size="sm"
-            className="w-full flex items-center gap-2"
+            className="w-full flex items-center"
             onClick={addApiKey}
           >
-            <Plus className="h-4 w-4" />
-            키 추가
+            <Plus className="h-4 w-4" /><p style={{transform: "translateY(2px)"}}>키 추가</p>
           </Button>
         </div>
-        <DialogFooter>
-            <DialogClose asChild>
-              <Button variant="outline">닫기</Button>
-            </DialogClose>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
