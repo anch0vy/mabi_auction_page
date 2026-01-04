@@ -34,4 +34,5 @@ export interface AuctionSection {
   id: string;
   title: string;
   items: AuctionItemData[];
+  bgColor?: string;
 }

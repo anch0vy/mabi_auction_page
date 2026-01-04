@@ -4,8 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuctionStore } from "@/lib/store";
 import { AuctionItemData, AuctionSection } from "@/types/common";
-import { ChevronDown, ChevronUp, Plus, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronUp, Palette, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export function AuctionSectionItemComponent({
   item,
@@ -108,7 +113,12 @@ export function AuctionSectionComponent({
   section,
   children,
 }: AuctionSectionProps) {
-  const { removeSection, updateSectionTitle, moveSection } = useAuctionStore();
+  const {
+    removeSection,
+    updateSectionTitle,
+    moveSection,
+    updateSectionColor,
+  } = useAuctionStore();
 
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(section.title);
@@ -126,11 +136,19 @@ export function AuctionSectionComponent({
     }
   };
 
+  const colors = [
+    { name: "옐로우", value: "#FFF2B3" },
+    { name: "민트", value: "#DFF3E3" },
+    { name: "스카이블루", value: "#DDEEFF" },
+    { name: "라일락", value: "#E9E2FF" },
+    { name: "피치", value: "#FFE2D2" },
+  ];
+
   return (
     <div className="pt-2">
       <div
         className="flex items-stretch justify-between group border-foreground border"
-        style={{ backgroundColor: "#FFF2B3" }}
+        style={{ backgroundColor: section.bgColor || "#FFF2B3" }}
       >
         <h2
           className="text-2xl font-bold flex-1 pl-2 border-r border-foreground hover:bg-foreground/10 cursor-pointer transition-colors flex items-center"
@@ -166,6 +184,28 @@ export function AuctionSectionComponent({
         >
           <Trash2 className="h-4 w-4" />
         </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="link"
+              size="icon"
+              className="h-auto w-10 border-r border-foreground border-t-0 border-b-0 border-l-0 hover:bg-foreground/10"
+            >
+              <Palette className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="flex gap-1 p-1 bg-white border-foreground border rounded-none">
+            {colors.map((color) => (
+              <button
+                key={color.value}
+                className="w-7 h-6 border border-foreground hover:scale-110 transition-transform"
+                style={{ backgroundColor: color.value }}
+                onClick={() => updateSectionColor(section.id, color.value)}
+                title={color.name}
+              />
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
         <Button
           variant="link"
           size="icon"
