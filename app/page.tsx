@@ -1,9 +1,11 @@
 "use client";
 
-import { useAuctionStore } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Plus, Pencil, Trash2, ChevronUp, ChevronDown } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { useAuctionStore } from "@/lib/store";
+import { ChevronDown, ChevronUp, Plus, Trash2 } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
 
 export default function Page() {
   const {
@@ -13,6 +15,9 @@ export default function Page() {
     updateSectionTitle,
     addItemToSection,
   } = useAuctionStore();
+
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editValue, setEditValue] = useState("");
 
   const handleAddSection = () => {
     const title = window.prompt("섹션 이름을 입력하세요");
@@ -28,11 +33,11 @@ export default function Page() {
     }
   };
 
-  const handleEditSection = (sectionId: string, currentTitle: string) => {
-    const newTitle = window.prompt("새 섹션 이름을 입력하세요", currentTitle);
-    if (newTitle && newTitle !== currentTitle) {
-      updateSectionTitle(sectionId, newTitle);
+  const handleSaveTitle = (id: string) => {
+    if (editValue.trim()) {
+      updateSectionTitle(id, editValue.trim());
     }
+    setEditingId(null);
   };
 
   const handleRemoveSection = (sectionId: string) => {
@@ -50,13 +55,36 @@ export default function Page() {
               className="flex items-stretch justify-between group border-foreground border"
               // style={{backgroundColor: "#F5F2E7"}}
             >
-              <h2 className="text-2xl font-bold flex-1 pl-2 pb-2 border-r border-foreground">
-                <p style={{ transform: "translateY(10px)" }}>{section.title}</p>
+              <h2
+                className="text-2xl font-bold flex-1 pl-2 border-r border-foreground hover:bg-foreground/10 cursor-pointer transition-colors flex items-center"
+                onClick={() => {
+                  setEditingId(section.id);
+                  setEditValue(section.title);
+                }}
+              >
+                {editingId === section.id ? (
+                  <Input
+                    autoFocus
+                    value={editValue}
+                    onChange={(e) => setEditValue(e.target.value)}
+                    onBlur={() => handleSaveTitle(section.id)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") handleSaveTitle(section.id);
+                      if (e.key === "Escape") setEditingId(null);
+                    }}
+                    className="text-2xl md:text-2xl font-bold h-auto border-none bg-transparent focus-visible:ring-0 p-0 m-0 rounded-none pb-2"
+                    style={{ transform: "translateY(9px)" }}
+                  />
+                ) : (
+                  <p className="pb-2" style={{ transform: "translateY(9px)" }}>
+                    {section.title}
+                  </p>
+                )}
               </h2>
               <Button
                 variant="link"
                 size="icon"
-                className="h-auto w-10 border-r border-foreground border-t-0 border-b-0 border-l-0"
+                className="h-auto w-10 border-r border-foreground border-t-0 border-b-0 border-l-0 hover:bg-foreground/10"
                 onClick={() => handleRemoveSection(section.id)}
               >
                 <Trash2 className="h-4 w-4" />
@@ -64,7 +92,7 @@ export default function Page() {
               <Button
                 variant="link"
                 size="icon"
-                className="h-auto w-10 border-r border-foreground border-t-0 border-b-0 border-l-0"
+                className="h-auto w-10 border-r border-foreground border-t-0 border-b-0 border-l-0 hover:bg-foreground/10"
                 onClick={() => {}}
               >
                 <ChevronUp className="h-4 w-4" />
@@ -72,7 +100,7 @@ export default function Page() {
               <Button
                 variant="link"
                 size="icon"
-                className="h-auto w-10"
+                className="h-auto w-10 hover:bg-foreground/10"
                 onClick={() => {}}
               >
                 <ChevronDown className="h-4 w-4" />
