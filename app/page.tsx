@@ -12,13 +12,6 @@ import { Plus } from "lucide-react";
 export default function Page() {
   const { sections, addSection } = useAuctionStore();
 
-  const handleAddSection = () => {
-    const title = window.prompt("섹션 이름을 입력하세요");
-    if (title) {
-      addSection(title);
-    }
-  };
-
   return (
     <div>
       <div>
@@ -28,6 +21,7 @@ export default function Page() {
               <AuctionSectionItemComponent
                 key={`${item.name}-${index}`}
                 item={item}
+                sectionId={section.id}
               />
             ))}
             <AuctionSectionItemAddComponent sectionId={section.id} />
@@ -36,7 +30,7 @@ export default function Page() {
       </div>
 
       <div className="flex justify-center pt-8 border-t">
-        <Button onClick={handleAddSection} className="gap-2">
+        <Button onClick={() => addSection("새로운 섹션")} className="gap-2">
           <Plus className="h-4 w-4" />
           섹션 추가
         </Button>

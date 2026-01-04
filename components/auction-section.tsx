@@ -1,21 +1,46 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useAuctionStore } from "@/lib/store";
-import { AuctionSection } from "@/types/common";
+import { AuctionItemData, AuctionSection } from "@/types/common";
 import { ChevronDown, ChevronUp, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 
-export function AuctionSectionItemComponent({ item }: { item: { name: string } }) {
+export function AuctionSectionItemComponent({
+  item,
+  sectionId,
+}: {
+  item: AuctionItemData;
+  sectionId: string;
+}) {
+  const { removeItemFromSection } = useAuctionStore();
+
+  const handleRemoveItem = () => {
+    if (window.confirm(`${item.name} 아이템을 삭제하시겠습니까?`)) {
+      removeItemFromSection(sectionId, item.name);
+    }
+  };
+
   return (
-    <Card className="h-32 flex flex-col items-center justify-center border-dashed">
-      <CardContent className="p-4 text-center">
-        <p className="font-medium">{item.name}</p>
-        <p className="text-sm text-muted-foreground">아이템 정보 placeholder</p>
-      </CardContent>
-    </Card>
+    <div className="h-32 flex flex-col border-foreground border">
+      <div className="flex items-stretch justify-between border-b border-foreground h-8">
+        <div className="flex-1 px-2 flex items-center font-medium text-sm truncate">
+          {item.name}
+        </div>
+        <Button
+          variant="link"
+          size="icon"
+          className="h-auto w-8 border-l border-t-0 border-b-0 border-r-0 border-foreground rounded-none hover:bg-foreground/10"
+          onClick={handleRemoveItem}
+        >
+          <Trash2 className="h-3.5 w-3.5" />
+        </Button>
+      </div>
+      <div className="flex-1 flex flex-col items-center justify-center p-2 text-center">
+        <p className="text-xs text-muted-foreground">아이템 정보 placeholder</p>
+      </div>
+    </div>
   );
 }
 
@@ -27,13 +52,16 @@ export function AuctionSectionItemAddComponent({
   const { addItemToSection } = useAuctionStore();
 
   const handleAddItem = () => {
-    addItemToSection(sectionId, "새로운 섹션");
+    const itemName = window.prompt("아이템 이름을 입력하세요");
+    if (itemName) {
+      addItemToSection(sectionId, itemName);
+    }
   };
 
   return (
     <Button
-      variant="outline"
-      className="h-32 border-dashed flex flex-col gap-2"
+      variant="link"
+      className="h-32 border-dashed flex flex-col gap-2 border-foreground border"
       onClick={handleAddItem}
     >
       <Plus className="h-6 w-6" />

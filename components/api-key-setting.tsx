@@ -90,7 +90,7 @@ export function ApiKeySetting() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm">
+        <Button variant="link" size="sm" className="border-foreground border">
             <p style={{transform: "translateY(2px)"}}>API 설정</p>
         </Button>
       </DialogTrigger>
