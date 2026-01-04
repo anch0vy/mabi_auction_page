@@ -29,6 +29,7 @@ export class NexonClient {
   async getAuctionHistory(
     cursor: string = ""
   ): Promise<AuctionHistoryResponse> {
+    const controller = new AbortController();
     return retry(
       async () => {
         // 기본적으로 요청 전 0.5초 대기
@@ -49,6 +50,11 @@ export class NexonClient {
           const errorData = (await response.json()) as {
             error?: { name: string; message: string };
           };
+
+          if (errorData?.error?.name === "OPENAPI00005") {
+            controller.abort();
+          }
+
           throw new Error(
             `Nexon API Error: ${errorData?.error?.message || response.statusText}`
           );
@@ -59,11 +65,13 @@ export class NexonClient {
       {
         retries: 3,
         delay: (retryCount) => retryCount * 1000,
+        signal: controller.signal,
       }
     );
   }
 
   async getAuctionList(itemName: string): Promise<AuctionListResponse> {
+    const controller = new AbortController();
     return retry(
       async () => {
         // 기본적으로 요청 전 0.5초 대기
@@ -82,6 +90,11 @@ export class NexonClient {
           const errorData = (await response.json()) as {
             error?: { name: string; message: string };
           };
+
+          if (errorData?.error?.name === "OPENAPI00005") {
+            controller.abort();
+          }
+
           throw new Error(
             `Nexon API Error: ${errorData?.error?.message || response.statusText}`
           );
@@ -92,6 +105,7 @@ export class NexonClient {
       {
         retries: 3,
         delay: (retryCount) => retryCount * 1000,
+        signal: controller.signal,
       }
     );
   }
@@ -100,6 +114,7 @@ export class NexonClient {
     keyword: string,
     cursor: string = ""
   ): Promise<AuctionListResponse> {
+    const controller = new AbortController();
     return retry(
       async () => {
         // 기본적으로 요청 전 0.5초 대기
@@ -121,6 +136,11 @@ export class NexonClient {
           const errorData = (await response.json()) as {
             error?: { name: string; message: string };
           };
+
+          if (errorData?.error?.name === "OPENAPI00005") {
+            controller.abort();
+          }
+
           throw new Error(
             `Nexon API Error: ${errorData?.error?.message || response.statusText}`
           );
@@ -131,6 +151,7 @@ export class NexonClient {
       {
         retries: 3,
         delay: (retryCount) => retryCount * 1000,
+        signal: controller.signal,
       }
     );
   }
