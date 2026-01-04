@@ -23,7 +23,10 @@ export function AuctionSectionItemComponent({
   };
 
   return (
-    <div className="h-32 flex flex-col border-foreground border">
+    <div
+      className="h-32 flex flex-col border-foreground border"
+      style={{backgroundColor: "#F5F2E7"}}
+    >
       <div className="flex items-stretch justify-between border-b border-foreground h-8">
         <div className="flex-1 px-2 flex items-center font-medium text-sm truncate">
           {item.name}
@@ -99,7 +102,10 @@ export function AuctionSectionComponent({
 
   return (
     <div className="pt-2">
-      <div className="flex items-stretch justify-between group border-foreground border">
+      <div
+        className="flex items-stretch justify-between group border-foreground border"
+        style={{backgroundColor: "#FFF2B3"}}
+      >
         <h2
           className="text-2xl font-bold flex-1 pl-2 border-r border-foreground hover:bg-foreground/10 cursor-pointer transition-colors flex items-center"
           onClick={() => {
