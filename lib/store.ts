@@ -35,6 +35,7 @@ interface AuctionStore {
   removeItemFromSection: (sectionId: string, itemName: string) => void;
   updateItemInfo: (sectionId: string, itemName: string, info: AuctionItem) => void;
   reorderSections: (sections: AuctionSection[]) => void;
+  moveSection: (sectionId: string, direction: "up" | "down") => void;
 }
 
 export const useAuctionStore = create<AuctionStore>()(
@@ -99,6 +100,25 @@ export const useAuctionStore = create<AuctionStore>()(
           ),
         })),
       reorderSections: (sections) => set({ sections }),
+      moveSection: (sectionId, direction) =>
+        set((state) => {
+          const index = state.sections.findIndex((s) => s.id === sectionId);
+          if (index === -1) return state;
+
+          const newSections = [...state.sections];
+          if (direction === "up" && index > 0) {
+            [newSections[index - 1], newSections[index]] = [
+              newSections[index],
+              newSections[index - 1],
+            ];
+          } else if (direction === "down" && index < newSections.length - 1) {
+            [newSections[index + 1], newSections[index]] = [
+              newSections[index],
+              newSections[index + 1],
+            ];
+          }
+          return { sections: newSections };
+        }),
     }),
     {
       name: "auction-storage",

@@ -27,10 +27,7 @@ export function AuctionSectionItemAddComponent({
   const { addItemToSection } = useAuctionStore();
 
   const handleAddItem = () => {
-    const itemName = window.prompt("아이템 이름을 입력하세요");
-    if (itemName) {
-      addItemToSection(sectionId, itemName);
-    }
+    addItemToSection(sectionId, "새로운 섹션");
   };
 
   return (
@@ -54,7 +51,7 @@ export function AuctionSectionComponent({
   section,
   children,
 }: AuctionSectionProps) {
-  const { removeSection, updateSectionTitle } = useAuctionStore();
+  const { removeSection, updateSectionTitle, moveSection } = useAuctionStore();
 
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(section.title);
@@ -113,7 +110,7 @@ export function AuctionSectionComponent({
           variant="link"
           size="icon"
           className="h-auto w-10 border-r border-foreground border-t-0 border-b-0 border-l-0 hover:bg-foreground/10"
-          onClick={() => {}}
+          onClick={() => moveSection(section.id, "up")}
         >
           <ChevronUp className="h-4 w-4" />
         </Button>
@@ -121,7 +118,7 @@ export function AuctionSectionComponent({
           variant="link"
           size="icon"
           className="h-auto w-10 hover:bg-foreground/10"
-          onClick={() => {}}
+          onClick={() => moveSection(section.id, "down")}
         >
           <ChevronDown className="h-4 w-4" />
         </Button>
