@@ -2,21 +2,12 @@ export interface AuctionHistoryItem {
   item_name: string;
   item_count: number;
   auction_price: number;
-  item_option: string;
   date_auction_buy: string;
 }
 
 export interface AuctionHistoryResponse {
   auction_history: AuctionHistoryItem[];
   next_cursor: string;
-}
-
-export interface AuctionItemOption {
-  option_type: string;
-  option_sub_type: string;
-  option_value: string;
-  option_value2: string;
-  option_desc: string;
 }
 
 export interface AuctionItem {
@@ -26,10 +17,21 @@ export interface AuctionItem {
   auction_item_category: string;
   auction_price_per_unit: number;
   date_auction_expire: string;
-  item_option: AuctionItemOption[];
 }
 
 export interface AuctionListResponse {
   auction_item: AuctionItem[];
   next_cursor: string;
+}
+
+export interface AuctionItemData {
+  name: string;
+  info: AuctionItem | null;
+  lastFetched: number | null;
+}
+
+export interface AuctionSection {
+  id: string;
+  title: string;
+  items: AuctionItemData[];
 }

@@ -2,7 +2,7 @@ import {
   AuctionHistoryItem,
   AuctionHistoryResponse,
   AuctionListResponse,
-} from "@/types/nexon";
+} from "@/types/common";
 import { retry } from "es-toolkit";
 
 const NEXON_HISTORY_API_URL =
