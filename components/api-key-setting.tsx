@@ -12,11 +12,10 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { useApiKeyStore } from "@/lib/store";
-import { Plus, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 
 export function ApiKeySetting() {
-  const { apiKeys, addApiKey, removeApiKey, updateApiKey } = useApiKeyStore();
+  const { apiKeys, updateApiKey } = useApiKeyStore();
   const [mounted, setMounted] = useState(false);
 
   // Hydration solution for zustand persist with SSR
@@ -33,38 +32,27 @@ export function ApiKeySetting() {
             <p style={{transform: "translateY(2px)"}}>API 설정</p>
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-100 border-foreground border p-0" showCloseButton={false}>
+      <DialogContent className="max-w-100 border-foreground border p-0 gap-0" showCloseButton={false}>
         <DialogHeader className="border-foreground border-b p-2">
           <DialogTitle style={{transform: "translateY(2px)"}}>API 키 관리</DialogTitle>
         </DialogHeader>
-        <div className="grid gap-4 py-4 max-h-[60vh] overflow-y-hidden pr-2">
+        <div className="pt-2">
           {apiKeys.map((key, index) => (
-            <div key={index} className="flex items-center gap-2">
+            <div key={index} className="flex items-center px-2 pb-2">
               <Input
                 placeholder={`API 키 ${index + 1}`}
                 value={key}
                 onChange={(e) => updateApiKey(index, e.target.value)}
+                className="border-foreground focus-visible:border-foreground"
               />
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => removeApiKey(index)}
-                disabled={apiKeys.length <= 1}
-                className="h-8 w-8"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
             </div>
           ))}
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-full flex items-center"
-            onClick={addApiKey}
-          >
-            <Plus className="h-4 w-4" /><p style={{transform: "translateY(2px)"}}>키 추가</p>
-          </Button>
         </div>
+        <DialogFooter className="border-foreground border-t">
+          <DialogClose className="px-2 py-2">
+            <p style={{transform: "translateY(2px)"}}>저장</p>
+          </DialogClose>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
