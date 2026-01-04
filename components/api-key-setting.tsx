@@ -11,6 +11,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { NexonClient } from "@/lib/nexon-client";
 import { useApiKeyStore } from "@/lib/store";
 import { Check, Loader2, X } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -45,8 +46,8 @@ function ApiKeyInput({
     // debounce 적용 (500ms)
     const timer = setTimeout(async () => {
       try {
-        // placeholder: 2초 기다린 후 유효한 것으로 간주
-        await new Promise((resolve) => setTimeout(resolve, 2000));
+        const client = new NexonClient(value);
+        await client.getAuctionHistory();
         setStatus("valid");
       } catch (error) {
         setStatus("invalid");
