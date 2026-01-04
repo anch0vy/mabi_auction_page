@@ -3,7 +3,7 @@
 import { useAuctionStore } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus, Pencil, Trash2, ChevronUp, ChevronDown } from "lucide-react";
 
 export default function Page() {
   const {
@@ -42,33 +42,46 @@ export default function Page() {
   };
 
   return (
-    <div className="container mx-auto p-4 space-y-8">
-      <div className="space-y-6">
+    <div>
+      <div>
         {sections.map((section) => (
-          <div key={section.id} className="space-y-4 border rounded-lg p-6">
-            <div className="flex items-center justify-between group">
-              <div className="flex items-center gap-4">
-                <h2 className="text-2xl font-bold">{section.title}</h2>
-                <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleEditSection(section.id, section.title)}
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-destructive"
-                    onClick={() => handleRemoveSection(section.id)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
+          <div key={section.id} className="pt-2">
+            <div
+              className="flex items-stretch justify-between group border-foreground border"
+              // style={{backgroundColor: "#F5F2E7"}}
+            >
+              <h2 className="text-2xl font-bold flex-1 pl-2 pb-2 border-r border-foreground">
+                <p style={{ transform: "translateY(10px)" }}>{section.title}</p>
+              </h2>
+              <Button
+                variant="link"
+                size="icon"
+                className="h-auto w-10 border-r border-foreground border-t-0 border-b-0 border-l-0"
+                onClick={() => handleRemoveSection(section.id)}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="link"
+                size="icon"
+                className="h-auto w-10 border-r border-foreground border-t-0 border-b-0 border-l-0"
+                onClick={() => {}}
+              >
+                <ChevronUp className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="link"
+                size="icon"
+                className="h-auto w-10"
+                onClick={() => {}}
+              >
+                <ChevronDown className="h-4 w-4" />
+              </Button>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <div
+              className="px-2 py-2 border-foreground border border-t-0 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
+              // style={{backgroundColor: "#F5F2E7"}}
+            >
               {section.items.map((item, index) => (
                 <Card
                   key={`${item.name}-${index}`}
