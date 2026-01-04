@@ -135,3 +135,11 @@
 html {
   font-size: 20px;
 }
+
+body {
+  background-image: 
+  linear-gradient(to right, #1212120a 1px, transparent 1px),
+  linear-gradient(to bottom, #1212120a 1px, transparent 1px);
+  background-size: 16px 16px;
+  background-color: #F5F2E7;
+}

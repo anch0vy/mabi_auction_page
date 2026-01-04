@@ -93,7 +93,9 @@ export function ApiKeySetting() {
             <p style={{transform: "translateY(2px)"}}>API 설정</p>
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-100 border-foreground border p-0 gap-0" showCloseButton={false}>
+      <DialogContent className="max-w-100 border-foreground border p-0 gap-0" showCloseButton={false} style={{
+        backgroundColor: "#F5F2E7",
+      }}>
         <DialogHeader className="border-foreground border-b p-2">
           <DialogTitle style={{transform: "translateY(2px)"}}>API 키 관리</DialogTitle>
         </DialogHeader>

@@ -1,7 +1,7 @@
+import { ApiKeySetting } from "@/components/api-key-setting";
 import type { Metadata } from "next";
 import Image from "next/image";
 import "./globals.css";
-import { ApiKeySetting } from "@/components/api-key-setting";
 
 export const metadata: Metadata = {
   title: "Mabinogi auction page",
