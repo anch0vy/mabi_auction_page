@@ -1,7 +1,16 @@
-import { AuctionHistoryItem, AuctionHistoryResponse } from "@/types/nexon";
+import {
+  AuctionHistoryItem,
+  AuctionHistoryResponse,
+  AuctionListResponse,
+} from "@/types/nexon";
 import { retry } from "es-toolkit";
 
-const NEXON_API_URL = "https://open.api.nexon.com/mabinogi/v1/auction/history";
+const NEXON_HISTORY_API_URL =
+  "https://open.api.nexon.com/mabinogi/v1/auction/history";
+const NEXON_LIST_API_URL =
+  "https://open.api.nexon.com/mabinogi/v1/auction/list";
+const NEXON_SEARCH_API_URL =
+  "https://open.api.nexon.com/mabinogi/v1/auction/keyword-search";
 
 export class NexonClient {
   private apiKeys: string[];
@@ -25,7 +34,7 @@ export class NexonClient {
         // 기본적으로 요청 전 0.5초 대기
         await new Promise((resolve) => setTimeout(resolve, 500));
 
-        const url = new URL(NEXON_API_URL);
+        const url = new URL(NEXON_HISTORY_API_URL);
         if (cursor) {
           url.searchParams.set("cursor", cursor);
         }
@@ -46,6 +55,78 @@ export class NexonClient {
         }
 
         return (await response.json()) as AuctionHistoryResponse;
+      },
+      {
+        retries: 3,
+        delay: (retryCount) => retryCount * 1000,
+      }
+    );
+  }
+
+  async getAuctionList(itemName: string): Promise<AuctionListResponse> {
+    return retry(
+      async () => {
+        // 기본적으로 요청 전 0.5초 대기
+        await new Promise((resolve) => setTimeout(resolve, 500));
+
+        const url = new URL(NEXON_LIST_API_URL);
+        url.searchParams.set("item_name", itemName);
+
+        const response = await fetch(url.toString(), {
+          headers: {
+            "x-nxopen-api-key": this.getNextKey(),
+          },
+        });
+
+        if (!response.ok) {
+          const errorData = (await response.json()) as {
+            error?: { name: string; message: string };
+          };
+          throw new Error(
+            `Nexon API Error: ${errorData?.error?.message || response.statusText}`
+          );
+        }
+
+        return (await response.json()) as AuctionListResponse;
+      },
+      {
+        retries: 3,
+        delay: (retryCount) => retryCount * 1000,
+      }
+    );
+  }
+
+  async searchAuctionItems(
+    keyword: string,
+    cursor: string = ""
+  ): Promise<AuctionListResponse> {
+    return retry(
+      async () => {
+        // 기본적으로 요청 전 0.5초 대기
+        await new Promise((resolve) => setTimeout(resolve, 500));
+
+        const url = new URL(NEXON_SEARCH_API_URL);
+        url.searchParams.set("keyword", keyword);
+        if (cursor) {
+          url.searchParams.set("cursor", cursor);
+        }
+
+        const response = await fetch(url.toString(), {
+          headers: {
+            "x-nxopen-api-key": this.getNextKey(),
+          },
+        });
+
+        if (!response.ok) {
+          const errorData = (await response.json()) as {
+            error?: { name: string; message: string };
+          };
+          throw new Error(
+            `Nexon API Error: ${errorData?.error?.message || response.statusText}`
+          );
+        }
+
+        return (await response.json()) as AuctionListResponse;
       },
       {
         retries: 3,
