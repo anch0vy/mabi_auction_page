@@ -24,11 +24,11 @@ export function AuctionSectionItemComponent({
 
   return (
     <div
-      className="h-32 flex flex-col border-foreground border"
-      style={{backgroundColor: "#F5F2E7"}}
+      className="flex flex-col border-foreground border"
+      style={{ backgroundColor: "#F5F2E7" }}
     >
       <div className="flex items-stretch justify-between border-b border-foreground h-8">
-        <div className="flex-1 px-2 flex items-center font-medium text-sm truncate">
+        <div className="px-2 flex items-center font-medium text-sm truncate">
           {item.name}
         </div>
         <Button
@@ -40,8 +40,34 @@ export function AuctionSectionItemComponent({
           <Trash2 className="h-3.5 w-3.5" />
         </Button>
       </div>
-      <div className="flex-1 flex flex-col items-center justify-center p-2 text-center">
-        <p className="text-xs text-muted-foreground">아이템 정보 placeholder</p>
+      <div className="flex flex-col items-center justify-center p-2">
+        <table className="w-full text-xs text-foreground border-collapse">
+          <tbody>
+            <tr className="border-b border-foreground/10">
+              <td className="text-left py-0.5">최저가</td>
+              <td className="text-right py-0.5 font-medium">... Gold</td>
+            </tr>
+            <tr className="border-b border-foreground/10">
+              <td className="text-left py-0.5">25개 평균</td>
+              <td className="text-right py-0.5 font-medium">... Gold</td>
+            </tr>
+            <tr className="border-b border-foreground/10">
+              <td className="text-left py-0.5">50개 평균</td>
+              <td className="text-right py-0.5 font-medium">... Gold</td>
+            </tr>
+            <tr className="border-b border-foreground/10">
+              <td className="text-left py-0.5">200개 평균</td>
+              <td className="text-right py-0.5 font-medium">... Gold</td>
+            </tr>
+            <tr>
+              <td className="text-left py-0.5">지난 24시간 거래량</td>
+              <td className="text-right py-0.5 font-medium">... Gold</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div className="px-2 flex justify-end text-sm border-t border-foreground">
+        <p style={{ transform: "translateY(1px)", fontSize: "14px" }}>과거 판매가 보기</p>
       </div>
     </div>
   );
@@ -64,7 +90,7 @@ export function AuctionSectionItemAddComponent({
   return (
     <Button
       variant="link"
-      className="h-32 border-dashed flex flex-col gap-2 border-foreground border"
+      className="h-auto border-dashed flex flex-col gap-2 border-foreground border"
       onClick={handleAddItem}
     >
       <Plus className="h-6 w-6" />
@@ -104,7 +130,7 @@ export function AuctionSectionComponent({
     <div className="pt-2">
       <div
         className="flex items-stretch justify-between group border-foreground border"
-        style={{backgroundColor: "#FFF2B3"}}
+        style={{ backgroundColor: "#FFF2B3" }}
       >
         <h2
           className="text-2xl font-bold flex-1 pl-2 border-r border-foreground hover:bg-foreground/10 cursor-pointer transition-colors flex items-center"
