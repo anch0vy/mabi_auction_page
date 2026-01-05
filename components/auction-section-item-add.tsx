@@ -96,14 +96,14 @@ export function AuctionSectionItemAddComponent({
           <span>아이템 추가</span>
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="p-0 border-foreground border rounded-none" align="start">
+      <PopoverContent className="p-0 border-foreground border rounded-none" align="center">
         <Command shouldFilter={false} style={{ backgroundColor: "#F5F2E7" }}>
           <CommandInput
             placeholder="아이템 검색..."
             value={search}
             onValueChange={handleSearchChange}
           />
-          <CommandList>
+          <CommandList className="max-h-60">
             {debouncedSearch.trim() === "" ? (
               <div className="py-6 text-center text-xs text-muted-foreground">
                 검색어를 입력하세요
