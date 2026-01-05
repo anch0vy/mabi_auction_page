@@ -2,9 +2,9 @@
 
 import {
   AuctionSectionComponent,
-  AuctionSectionItemAddComponent,
   AuctionSectionItemComponent,
 } from "@/components/auction-section";
+import { AuctionSectionItemAddComponent } from "@/components/auction-section-item-add";
 import { Button } from "@/components/ui/button";
 import { useAuctionStore } from "@/lib/store";
 import { Plus } from "lucide-react";
