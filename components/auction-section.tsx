@@ -123,14 +123,16 @@ export function AuctionSectionItemAddComponent({
     const trimmedSearch = debouncedSearch.trim();
     if (!trimmedSearch) return [];
 
+    const searchPattern = trimmedSearch.toLowerCase().replace(/\s+/g, "");
+
     const filtered = items.filter((item) =>
-      item.toLowerCase().includes(trimmedSearch.toLowerCase())
+      item.toLowerCase().replace(/\s+/g, "").includes(searchPattern)
     );
 
     // 입력한 텍스트가 목록에 정확히 일치하지 않더라도 최상단에 추가
     const results = [...filtered];
     const exactMatchIndex = results.findIndex(
-      (item) => item.toLowerCase() === trimmedSearch.toLowerCase()
+      (item) => item.toLowerCase().replace(/\s+/g, "") === searchPattern
     );
 
     if (exactMatchIndex > -1) {
