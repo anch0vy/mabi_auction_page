@@ -7,6 +7,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { useAuctionStore } from "@/lib/store";
 import { AuctionItemData, AuctionSection } from "@/types/common";
 import { ChevronDown, ChevronUp, Palette, Trash2 } from "lucide-react";
@@ -50,30 +55,85 @@ export function AuctionSectionItemComponent({
           <tbody>
             <tr className="border-b border-foreground/10">
               <td className="text-left py-0.5">최저가</td>
-              <td className="text-right py-0.5 font-medium">... Gold</td>
+              <td className="text-right py-0.5 font-medium">123,123,123 Gold</td>
             </tr>
             <tr className="border-b border-foreground/10">
               <td className="text-left py-0.5">25개 평균</td>
-              <td className="text-right py-0.5 font-medium">... Gold</td>
+              <td className="text-right py-0.5 font-medium">123,123,123 Gold</td>
             </tr>
             <tr className="border-b border-foreground/10">
               <td className="text-left py-0.5">50개 평균</td>
-              <td className="text-right py-0.5 font-medium">... Gold</td>
+              <td className="text-right py-0.5 font-medium">123,123,123 Gold</td>
             </tr>
             <tr className="border-b border-foreground/10">
               <td className="text-left py-0.5">200개 평균</td>
-              <td className="text-right py-0.5 font-medium">... Gold</td>
+              <td className="text-right py-0.5 font-medium">123,123,123 Gold</td>
             </tr>
             <tr>
               <td className="text-left py-0.5">지난 24시간 거래량</td>
-              <td className="text-right py-0.5 font-medium">... Gold</td>
+              <td className="text-right py-0.5 font-medium">123,123 건</td>
             </tr>
           </tbody>
         </table>
       </div>
-      <div className="px-2 py-1 flex justify-end text-xs border-t border-foreground hover:bg-foreground/10">
-        <p style={{ transform: "translateY(1px)" }}>과거 판매가 보기</p>
-      </div>
+      <Popover>
+        <PopoverTrigger asChild>
+          <div className="px-2 py-1 flex justify-end text-xs border-t border-foreground hover:bg-foreground/10 cursor-pointer">
+            <p style={{ transform: "translateY(1px)" }}>과거 판매가 보기</p>
+          </div>
+        </PopoverTrigger>
+        <PopoverContent
+          align="center"
+          className="w-auto bg-[#F5F2E7] border-foreground border rounded-none p-0"
+        >
+          <table className="text-xs text-foreground border-collapse">
+            <thead>
+              <tr className="border-b border-foreground">
+                <th className="pl-2 pr-1 py-1 font-semibold text-center">날짜</th>
+                <th className="px-1 py-1 font-semibold text-center">시작</th>
+                <th className="px-1 py-1 font-semibold text-center">종료</th>
+                <th className="pl-1 pr-2 py-1 font-semibold text-center">가격</th>
+                <th className="pr-2 font-semibold text-center">24H 평균</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[
+                "00시 ~ 03시",
+                "03시 ~ 06시",
+                "06시 ~ 09시",
+                "09시 ~ 12시",
+                "12시 ~ 15시",
+                "15시 ~ 18시",
+                "18시 ~ 21시",
+                "21시 ~ 24시",
+              ].map((timeRange, index, array) => {
+                const [start, end] = timeRange.split(" ~ ");
+                return (
+                  <tr
+                    key={timeRange}
+                    className={
+                      index !== array.length - 1 ? "border-b border-foreground" : ""
+                    }
+                  >
+                    <td className="pl-2 pr-1 text-center whitespace-nowrap">26.xx.xx</td>
+                    <td className="px-1 py-1 text-center whitespace-nowrap">{start}</td>
+                    <td className="px-1 py-1 text-center whitespace-nowrap">{end}</td>
+                    <td className="pl-1 pr-2 text-center font-medium whitespace-nowrap">123,123,123 Gold</td>
+                    {index === 0 && (
+                      <td
+                        rowSpan={array.length}
+                        className="px-2 text-center whitespace-nowrap border-l border-foreground align-middle"
+                      >
+                        123,123,123 Gold
+                      </td>
+                    )}
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </PopoverContent>
+      </Popover>
     </div>
   );
 }
