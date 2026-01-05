@@ -32,6 +32,45 @@ export function AuctionSectionItemComponent({
     }
   };
 
+  const now = new Date();
+  const currentHour = now.getHours();
+  // 현재 시간 기준 가장 가까운 과거의 3시간 단위 시작 시간 (0, 3, 6, 9, 12, 15, 18, 21)
+  const latestStartHour = Math.floor(currentHour / 3) * 3;
+
+  const timeSlots = [];
+  for (let i = 7; i >= 0; i--) {
+    const slotStart = new Date(now);
+    slotStart.setHours(latestStartHour - i * 3, 0, 0, 0);
+
+    const slotEnd = new Date(slotStart);
+    slotEnd.setHours(slotStart.getHours() + 3);
+
+    const formatDate = (d: Date) => {
+      const yy = d.getFullYear().toString().slice(-2);
+      const mm = String(d.getMonth() + 1).padStart(2, "0");
+      const dd = String(d.getDate()).padStart(2, "0");
+      return `${yy}.${mm}.${dd}`;
+    };
+
+    const formatHour = (d: Date) => {
+      const h = d.getHours();
+      return `${String(h).padStart(2, "0")}시`;
+    };
+
+    // 종료 시간이 다음날 00시인 경우 24시로 표시
+    const endHourDisplay =
+      slotEnd.getHours() === 0 && slotEnd.getDate() !== slotStart.getDate()
+        ? "24시"
+        : formatHour(slotEnd);
+
+    timeSlots.push({
+      date: formatDate(slotStart),
+      start: formatHour(slotStart),
+      end: endHourDisplay,
+      key: slotStart.getTime(),
+    });
+  }
+
   return (
     <div
       className="flex flex-col border-foreground border"
@@ -89,47 +128,45 @@ export function AuctionSectionItemComponent({
           <table className="text-xs text-foreground border-collapse">
             <thead>
               <tr className="border-b border-foreground">
-                <th className="pl-2 pr-1 py-1 font-semibold text-center">날짜</th>
-                <th className="px-1 py-1 font-semibold text-center">시작</th>
-                <th className="px-1 py-1 font-semibold text-center">종료</th>
-                <th className="pl-1 pr-2 py-1 font-semibold text-center">가격</th>
-                <th className="pr-2 font-semibold text-center">24H 평균</th>
+                <th style={{ transform: "translateY(1px)" }} className="pl-2 pr-1 py-1 font-semibold text-center">날짜</th>
+                <th style={{ transform: "translateY(1px)" }} className="px-1 py-1 font-semibold text-center">시작</th>
+                <th style={{ transform: "translateY(1px)" }} className="px-1 py-1 font-semibold text-center">종료</th>
+                <th style={{ transform: "translateY(1px)" }} className="pl-1 pr-2 py-1 font-semibold text-center">가격</th>
+                <th style={{ transform: "translateY(1px)" }} className="pr-2 font-semibold text-center">24H 평균</th>
               </tr>
             </thead>
             <tbody>
-              {[
-                "00시 ~ 03시",
-                "03시 ~ 06시",
-                "06시 ~ 09시",
-                "09시 ~ 12시",
-                "12시 ~ 15시",
-                "15시 ~ 18시",
-                "18시 ~ 21시",
-                "21시 ~ 24시",
-              ].map((timeRange, index, array) => {
-                const [start, end] = timeRange.split(" ~ ");
-                return (
-                  <tr
-                    key={timeRange}
-                    className={
-                      index !== array.length - 1 ? "border-b border-foreground" : ""
-                    }
-                  >
-                    <td className="pl-2 pr-1 text-center whitespace-nowrap">26.xx.xx</td>
-                    <td className="px-1 py-1 text-center whitespace-nowrap">{start}</td>
-                    <td className="px-1 py-1 text-center whitespace-nowrap">{end}</td>
-                    <td className="pl-1 pr-2 text-center font-medium whitespace-nowrap">123,123,123 Gold</td>
-                    {index === 0 && (
-                      <td
-                        rowSpan={array.length}
-                        className="px-2 text-center whitespace-nowrap border-l border-foreground align-middle"
-                      >
-                        123,123,123 Gold
-                      </td>
-                    )}
-                  </tr>
-                );
-              })}
+              {timeSlots.map((slot, index, array) => (
+                <tr
+                  key={slot.key}
+                  style={{ transform: "translateY(1px)" }}
+                  className={
+                    index !== array.length - 1 ? "border-b border-foreground" : ""
+                  }
+                >
+                  <td style={{ transform: "translateY(1px)" }} className="pl-2 pr-1 text-center whitespace-nowrap">
+                    {slot.date}
+                  </td>
+                  <td style={{ transform: "translateY(1px)" }} className="px-1 py-1 text-center whitespace-nowrap">
+                    {slot.start}
+                  </td>
+                  <td style={{ transform: "translateY(1px)" }} className="px-1 py-1 text-center whitespace-nowrap">
+                    {slot.end}
+                  </td>
+                  <td style={{ transform: "translateY(1px)" }} className="pl-1 pr-2 text-center font-medium whitespace-nowrap">
+                    123,123,123 Gold
+                  </td>
+                  {index === 0 && (
+                    <td
+                      rowSpan={array.length}
+                      style={{ transform: "translateY(1px)" }}
+                      className="px-2 text-center whitespace-nowrap border-l border-foreground align-middle"
+                    >
+                      123,123,123 Gold
+                    </td>
+                  )}
+                </tr>
+              ))}
             </tbody>
           </table>
         </PopoverContent>
