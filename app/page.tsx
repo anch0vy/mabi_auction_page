@@ -6,6 +6,7 @@ import {
 } from "@/components/auction-section";
 import { AuctionSectionItemAddComponent } from "@/components/auction-section-item-add";
 import { Button } from "@/components/ui/button";
+import "@/lib/mabi-auction-dump-data-client";
 import { useAuctionStore } from "@/lib/store";
 import { Plus } from "lucide-react";
 

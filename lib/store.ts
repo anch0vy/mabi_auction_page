@@ -1,6 +1,7 @@
 import { AuctionItem, AuctionSection } from "@/types/common";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { AuctionHistoryItem } from "./mabi-auction-dump-data-client";
 
 interface ApiKeyStore {
   apiKeys: string[];
@@ -38,6 +39,27 @@ interface AuctionStore {
   moveSection: (sectionId: string, direction: "up" | "down") => void;
   updateSectionColor: (sectionId: string, color: string) => void;
 }
+
+interface AuctionHistoryStore {
+  history: AuctionHistoryItem[];
+  setHistory: (history: AuctionHistoryItem[]) => void;
+  lastSynced: number | null;
+  setLastSynced: (timestamp: number) => void;
+}
+
+export const useAuctionHistoryStore = create<AuctionHistoryStore>()(
+  persist(
+    (set) => ({
+      history: [],
+      setHistory: (history) => set({ history }),
+      lastSynced: null,
+      setLastSynced: (lastSynced) => set({ lastSynced }),
+    }),
+    {
+      name: "auction-history-storage",
+    }
+  )
+);
 
 export const useAuctionStore = create<AuctionStore>()(
   persist(
