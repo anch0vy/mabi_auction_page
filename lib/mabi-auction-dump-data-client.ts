@@ -1,17 +1,9 @@
 'use client';
 
-import { format, subMonths, isAfter, subDays } from 'date-fns';
+import { AuctionHistoryItem } from '@/types/common';
+import { format, isAfter, subDays, subMonths } from 'date-fns';
 import { toZonedTime } from 'date-fns-tz';
 import { Semaphore } from 'es-toolkit';
-
-export interface AuctionHistoryItem {
-  auction_buy_id: string;
-  date_auction_buy: string; // 예: 2026-01-03T15:40:55.000Z
-  item_name: string;
-  item_count: number;
-  auction_price_per_unit: number;
-  [key: string]: any;
-}
 
 export interface GitHubContent {
   name: string;
