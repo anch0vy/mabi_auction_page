@@ -14,8 +14,15 @@ import {
 } from "@/components/ui/popover";
 import { useAuctionStore } from "@/lib/store";
 import { AuctionItemData, AuctionSection } from "@/types/common";
+import {
+  format,
+  isWithinInterval,
+  parseISO,
+  startOfHour,
+  subHours,
+} from "date-fns";
 import { ChevronDown, ChevronUp, Palette, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 export function AuctionSectionItemComponent({
   item,
@@ -24,7 +31,7 @@ export function AuctionSectionItemComponent({
   item: AuctionItemData;
   sectionId: string;
 }) {
-  const { removeItemFromSection, isSyncing } = useAuctionStore();
+  const { removeItemFromSection, isSyncing, syncedData } = useAuctionStore();
 
   const handleRemoveItem = () => {
     if (window.confirm(`${item.name} 아이템을 삭제하시겠습니까?`)) {
@@ -32,44 +39,68 @@ export function AuctionSectionItemComponent({
     }
   };
 
-  const now = new Date();
-  const currentHour = now.getHours();
-  // 현재 시간 기준 가장 가까운 과거의 3시간 단위 시작 시간 (0, 3, 6, 9, 12, 15, 18, 21)
-  const latestStartHour = Math.floor(currentHour / 3) * 3;
+  const itemHistory = useMemo(() => {
+    return syncedData.filter((d) => d.item_name === item.name);
+  }, [syncedData, item.name]);
 
-  const timeSlots = [];
-  for (let i = 7; i >= 0; i--) {
-    const slotStart = new Date(now);
-    slotStart.setHours(latestStartHour - i * 3, 0, 0, 0);
+  const timeSlots = useMemo(() => {
+    const now = new Date();
+    const currentHour = now.getHours();
+    const latestStartHour = Math.floor(currentHour / 3) * 3;
+    const slots = [];
 
-    const slotEnd = new Date(slotStart);
-    slotEnd.setHours(slotStart.getHours() + 3);
+    for (let i = 7; i >= 0; i--) {
+      const slotStart = startOfHour(subHours(now, currentHour - latestStartHour + i * 3));
+      const slotEnd = subHours(slotStart, -3);
 
-    const formatDate = (d: Date) => {
-      const yy = d.getFullYear().toString().slice(-2);
-      const mm = String(d.getMonth() + 1).padStart(2, "0");
-      const dd = String(d.getDate()).padStart(2, "0");
-      return `${yy}.${mm}.${dd}`;
-    };
+      const filtered = itemHistory.filter((d) => {
+        const date = parseISO(d.date_auction_buy);
+        return isWithinInterval(date, { start: slotStart, end: slotEnd });
+      });
 
-    const formatHour = (d: Date) => {
-      const h = d.getHours();
-      return `${String(h).padStart(2, "0")}시`;
-    };
+      const avgPrice =
+        filtered.length > 0
+          ? Math.floor(
+            filtered.reduce((acc, cur) => acc + cur.auction_price_per_unit, 0) /
+            filtered.length
+          )
+          : 0;
 
-    // 종료 시간이 다음날 00시인 경우 24시로 표시
-    const endHourDisplay =
-      slotEnd.getHours() === 0 && slotEnd.getDate() !== slotStart.getDate()
-        ? "24시"
-        : formatHour(slotEnd);
+      slots.push({
+        date: format(slotStart, "yy.MM.dd"),
+        start: format(slotStart, "HH시"),
+        end:
+          slotEnd.getHours() === 0 && slotEnd.getDate() !== slotStart.getDate()
+            ? "24시"
+            : format(slotEnd, "HH시"),
+        price: avgPrice,
+        key: slotStart.getTime(),
+      });
+    }
+    return slots;
+  }, [itemHistory]);
 
-    timeSlots.push({
-      date: formatDate(slotStart),
-      start: formatHour(slotStart),
-      end: endHourDisplay,
-      key: slotStart.getTime(),
+  const history24h = useMemo(() => {
+    const now = new Date();
+    const twentyFourHoursAgo = subHours(now, 24);
+    return itemHistory.filter((d) => {
+      const date = parseISO(d.date_auction_buy);
+      return isWithinInterval(date, { start: twentyFourHoursAgo, end: now });
     });
-  }
+  }, [itemHistory]);
+
+  const avg24h = useMemo(() => {
+    return history24h.length > 0
+      ? Math.floor(
+        history24h.reduce((acc, cur) => acc + cur.auction_price_per_unit, 0) /
+        history24h.length
+      )
+      : 0;
+  }, [history24h]);
+
+  const formatGold = (amount: number) => {
+    return amount > 0 ? amount.toLocaleString() + " Gold" : "-";
+  };
 
   return (
     <div
@@ -119,7 +150,7 @@ export function AuctionSectionItemComponent({
             <tr>
               <td className="text-left py-0.5">지난 24시간 거래량</td>
               <td className="text-right py-0.5 font-medium">
-                {isSyncing ? "(Loading....)" : "123,123 건"}
+                {isSyncing ? "(Loading....)" : `${history24h.length.toLocaleString()} 건`}
               </td>
             </tr>
           </tbody>
@@ -164,7 +195,7 @@ export function AuctionSectionItemComponent({
                     {slot.end}
                   </td>
                   <td style={{ transform: "translateY(1px)" }} className="pl-1 pr-2 text-center font-medium whitespace-nowrap">
-                    {isSyncing ? "(Loading....)" : "123,123,123 Gold"}
+                    {isSyncing ? "(Loading....)" : formatGold(slot.price)}
                   </td>
                   {index === 0 && (
                     <td
@@ -172,7 +203,7 @@ export function AuctionSectionItemComponent({
                       style={{ transform: "translateY(1px)" }}
                       className="px-2 text-center whitespace-nowrap border-l border-foreground align-middle"
                     >
-                      {isSyncing ? "(Loading....)" : "123,123,123 Gold"}
+                      {isSyncing ? "(Loading....)" : formatGold(avg24h)}
                     </td>
                   )}
                 </tr>
