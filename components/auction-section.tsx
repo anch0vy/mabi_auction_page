@@ -120,12 +120,29 @@ export function AuctionSectionItemAddComponent({
   };
 
   const filteredItems = useMemo(() => {
-    if (!debouncedSearch.trim()) return [];
-    return items
-      .filter((item) =>
-        item.toLowerCase().includes(debouncedSearch.toLowerCase())
-      )
-      .slice(0, 50); // 성능을 위해 상위 50개만 표시
+    const trimmedSearch = debouncedSearch.trim();
+    if (!trimmedSearch) return [];
+
+    const filtered = items.filter((item) =>
+      item.toLowerCase().includes(trimmedSearch.toLowerCase())
+    );
+
+    // 입력한 텍스트가 목록에 정확히 일치하지 않더라도 최상단에 추가
+    const results = [...filtered];
+    const exactMatchIndex = results.findIndex(
+      (item) => item.toLowerCase() === trimmedSearch.toLowerCase()
+    );
+
+    if (exactMatchIndex > -1) {
+      // 정확히 일치하는 항목이 있으면 최상단으로 이동
+      const exactMatch = results.splice(exactMatchIndex, 1)[0];
+      results.unshift(exactMatch);
+    } else {
+      // 일치하는 항목이 없으면 입력한 텍스트 자체를 최상단에 추가
+      results.unshift(trimmedSearch);
+    }
+
+    return results.slice(0, 50); // 성능을 위해 상위 50개만 표시
   }, [items, debouncedSearch]);
 
   const handleSelect = (itemName: string) => {
@@ -147,7 +164,7 @@ export function AuctionSectionItemAddComponent({
         </Button>
       </PopoverTrigger>
       <PopoverContent className="p-0 border-foreground border rounded-none" align="start">
-        <Command shouldFilter={false}>
+        <Command shouldFilter={false} style={{ backgroundColor: "#F5F2E7" }}>
           <CommandInput
             placeholder="아이템 검색..."
             value={search}
@@ -167,6 +184,7 @@ export function AuctionSectionItemAddComponent({
                       key={itemName}
                       value={itemName}
                       onSelect={() => handleSelect(itemName)}
+                      className="data-[selected=true]:bg-foreground/20"
                     >
                       {itemName}
                     </CommandItem>
