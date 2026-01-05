@@ -24,7 +24,7 @@ export function AuctionSectionItemComponent({
   item: AuctionItemData;
   sectionId: string;
 }) {
-  const { removeItemFromSection } = useAuctionStore();
+  const { removeItemFromSection, isSyncing } = useAuctionStore();
 
   const handleRemoveItem = () => {
     if (window.confirm(`${item.name} 아이템을 삭제하시겠습니까?`)) {
@@ -94,23 +94,33 @@ export function AuctionSectionItemComponent({
           <tbody>
             <tr className="border-b border-foreground/10">
               <td className="text-left py-0.5">최저가</td>
-              <td className="text-right py-0.5 font-medium">123,123,123 Gold</td>
+              <td className="text-right py-0.5 font-medium">
+                123,123,123 Gold
+              </td>
             </tr>
             <tr className="border-b border-foreground/10">
               <td className="text-left py-0.5">25개 평균</td>
-              <td className="text-right py-0.5 font-medium">123,123,123 Gold</td>
+              <td className="text-right py-0.5 font-medium">
+                123,123,123 Gold
+              </td>
             </tr>
             <tr className="border-b border-foreground/10">
               <td className="text-left py-0.5">50개 평균</td>
-              <td className="text-right py-0.5 font-medium">123,123,123 Gold</td>
+              <td className="text-right py-0.5 font-medium">
+                123,123,123 Gold
+              </td>
             </tr>
             <tr className="border-b border-foreground/10">
               <td className="text-left py-0.5">200개 평균</td>
-              <td className="text-right py-0.5 font-medium">123,123,123 Gold</td>
+              <td className="text-right py-0.5 font-medium">
+                123,123,123 Gold
+              </td>
             </tr>
             <tr>
               <td className="text-left py-0.5">지난 24시간 거래량</td>
-              <td className="text-right py-0.5 font-medium">123,123 건</td>
+              <td className="text-right py-0.5 font-medium">
+                {isSyncing ? "(Loading....)" : "123,123 건"}
+              </td>
             </tr>
           </tbody>
         </table>
@@ -154,7 +164,7 @@ export function AuctionSectionItemComponent({
                     {slot.end}
                   </td>
                   <td style={{ transform: "translateY(1px)" }} className="pl-1 pr-2 text-center font-medium whitespace-nowrap">
-                    123,123,123 Gold
+                    {isSyncing ? "(Loading....)" : "123,123,123 Gold"}
                   </td>
                   {index === 0 && (
                     <td
@@ -162,7 +172,7 @@ export function AuctionSectionItemComponent({
                       style={{ transform: "translateY(1px)" }}
                       className="px-2 text-center whitespace-nowrap border-l border-foreground align-middle"
                     >
-                      123,123,123 Gold
+                      {isSyncing ? "(Loading....)" : "123,123,123 Gold"}
                     </td>
                   )}
                 </tr>

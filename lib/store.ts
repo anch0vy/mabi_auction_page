@@ -1,7 +1,7 @@
 import { AuctionItem, AuctionSection } from "@/types/common";
+import { AuctionHistoryItem } from "@/lib/mabi-auction-dump-data-client";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { AuctionHistoryItem } from "./mabi-auction-dump-data-client";
 
 interface ApiKeyStore {
   apiKeys: string[];
@@ -38,11 +38,19 @@ interface AuctionStore {
   reorderSections: (sections: AuctionSection[]) => void;
   moveSection: (sectionId: string, direction: "up" | "down") => void;
   updateSectionColor: (sectionId: string, color: string) => void;
+  isSyncing: boolean;
+  setIsSyncing: (isSyncing: boolean) => void;
+  syncedData: AuctionHistoryItem[];
+  setSyncedData: (data: AuctionHistoryItem[]) => void;
 }
 
 export const useAuctionStore = create<AuctionStore>()(
   persist(
     (set) => ({
+      isSyncing: false,
+      setIsSyncing: (isSyncing) => set({ isSyncing }),
+      syncedData: [],
+      setSyncedData: (syncedData) => set({ syncedData }),
       sections: [],
       addSection: (title) =>
         set((state) => ({
@@ -130,6 +138,10 @@ export const useAuctionStore = create<AuctionStore>()(
     }),
     {
       name: "auction-storage",
+      partialize: (state) => {
+        const { syncedData, ...rest } = state;
+        return rest;
+      },
     }
   )
 );

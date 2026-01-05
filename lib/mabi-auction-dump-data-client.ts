@@ -7,6 +7,9 @@ import { Semaphore } from 'es-toolkit';
 export interface AuctionHistoryItem {
   auction_buy_id: string;
   date_auction_buy: string; // 예: 2026-01-03T15:40:55.000Z
+  item_name: string;
+  item_count: number;
+  auction_price_per_unit: number;
   [key: string]: any;
 }
 
@@ -181,6 +184,9 @@ export class GitHubClient {
   }
 }
 
+export const mabiAuctionDumpDataClient = new GitHubClient('anch0vy', 'mabi_auctuion_dump_data');  // 오타 아님.
+
 if (typeof window !== 'undefined') {
   (window as any).GitHubClient = GitHubClient;
+  (window as any).mabiAuctionDumpDataClient = mabiAuctionDumpDataClient;
 }
