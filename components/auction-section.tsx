@@ -32,9 +32,9 @@ export function AuctionSectionItemComponent({
       className="flex flex-col border-foreground border"
       style={{ backgroundColor: "#F5F2E7" }}
     >
-      <div className="flex items-stretch justify-between border-b border-foreground h-8">
-        <div className="px-2 flex items-center font-medium text-sm truncate">
-          {item.name}
+      <div className="flex items-stretch justify-between border-b border-foreground">
+        <div className="px-2 py-1 flex items-center font-medium text-sm truncate">
+          <p style={{ transform: "translateY(3px)" }}>{item.name}</p>
         </div>
         <Button
           variant="link"
@@ -71,8 +71,8 @@ export function AuctionSectionItemComponent({
           </tbody>
         </table>
       </div>
-      <div className="px-2 flex justify-end text-sm border-t border-foreground">
-        <p style={{ transform: "translateY(1px)", fontSize: "14px" }}>과거 판매가 보기</p>
+      <div className="px-2 py-1 flex justify-end text-xs border-t border-foreground">
+        <p style={{ transform: "translateY(1px)" }}>과거 판매가 보기</p>
       </div>
     </div>
   );
@@ -95,7 +95,7 @@ export function AuctionSectionItemAddComponent({
   return (
     <Button
       variant="link"
-      className="h-auto border-dashed flex flex-col gap-2 border-foreground border"
+      className="h-auto min-h-43 border-dashed flex flex-col gap-2 border-foreground border"
       onClick={handleAddItem}
     >
       <Plus className="h-6 w-6" />
