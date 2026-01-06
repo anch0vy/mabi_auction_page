@@ -19,7 +19,7 @@ export default function RootLayout({
         <div className="flex flex-col h-[100dvh] max-w-[1280px] mx-auto w-full">
           <header className="border-b border-foreground py-2 text-[24px] w-full flex items-center justify-between flex-shrink-0">
             <div className="flex items-center gap-2">
-              <Image src="/symbol_C.png" alt="logo" width={32} height={32} />
+              <img src="/symbol_C.png" alt="logo" width={32} height={32} />
               <p className="font-bold" style={{transform: "translateY(2px)"}}>마비노기 경매장</p>
             </div>
             <ApiKeySetting />
