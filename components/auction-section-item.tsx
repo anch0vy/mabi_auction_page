@@ -4,7 +4,7 @@ import { AuctionHistoryPopover } from "@/components/auction-history-popover";
 import { Button } from "@/components/ui/button";
 import { NexonClient } from "@/lib/nexon-client";
 import { useApiKeyStore, useAuctionStore } from "@/lib/store";
-import { AuctionItem, AuctionItemData } from "@/types/common";
+import { AuctionItem, AuctionItemData, AuctionListResponse } from "@/types/common";
 import { isWithinInterval, parseISO, subHours } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
 import { Trash2 } from "lucide-react";
@@ -37,7 +37,7 @@ export function AuctionSectionItemComponent({
 
         const cachedResponse = await cache.match(cacheKey);
         if (cachedResponse) {
-          const cachedData = await cachedResponse.json();
+          const cachedData = await cachedResponse.json<AuctionListResponse>();
           const cacheTime = cachedResponse.headers.get("X-Cache-Timestamp");
           const now = new Date().getTime();
 
@@ -68,7 +68,7 @@ export function AuctionSectionItemComponent({
       }
     };
     fetchList();
-  }, [item.name]);
+  }, [item.name, apiKeys]);
 
   const stats = useMemo(() => {
     if (!auctionList || auctionList.length === 0) {

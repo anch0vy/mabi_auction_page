@@ -45,13 +45,13 @@ export function AuctionSectionItemAddComponent({
           }
         }
 
-        const data = await response.json();
+        const data = await response.json<string[]>();
         setItems(data);
       } catch (err) {
         console.error("Failed to load items:", err);
         // 캐시 실패 시 일반 fetch 시도
         fetch(url)
-          .then((res) => res.json())
+          .then((res) => res.json<string[]>())
           .then((data) => setItems(data))
           .catch((e) => console.error("Fallback fetch failed:", e));
       }
