@@ -6,8 +6,9 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { useAuctionStore } from "@/lib/store";
-import { AuctionItemData } from "@/types/common";
+import { useApiKeyStore, useAuctionStore } from "@/lib/store";
+import { NexonClient } from "@/lib/nexon-client";
+import { AuctionItem, AuctionItemData } from "@/types/common";
 import {
   format,
   isWithinInterval,
@@ -19,7 +20,7 @@ import {
 } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
 import { Trash2 } from "lucide-react";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 export function AuctionSectionItemComponent({
   item,
@@ -29,6 +30,63 @@ export function AuctionSectionItemComponent({
   sectionId: string;
 }) {
   const { removeItemFromSection, isSyncing, syncedData } = useAuctionStore();
+  const { apiKeys } = useApiKeyStore();
+  const [auctionList, setAuctionList] = useState<AuctionItem[]>([]);
+  const [isLoadingList, setIsLoadingList] = useState(false);
+
+  useEffect(() => {
+    const fetchList = async () => {
+      const validKeys = apiKeys.filter((k) => k.trim() !== "");
+      if (validKeys.length === 0) return;
+
+      setIsLoadingList(true);
+      try {
+        const client = new NexonClient(validKeys.join(","));
+        const response = await client.getAuctionList(item.name);
+        setAuctionList(response.auction_item);
+      } catch (error) {
+        console.error("Failed to fetch auction list", error);
+      } finally {
+        setIsLoadingList(false);
+      }
+    };
+    fetchList();
+  }, [item.name, apiKeys]);
+
+  const stats = useMemo(() => {
+    if (!auctionList || auctionList.length === 0) {
+      return { minPrice: 0, avg25: 0, avg50: 0, avg200: 0 };
+    }
+
+    const sortedItems = [...auctionList].sort(
+      (a, b) => a.auction_price_per_unit - b.auction_price_per_unit
+    );
+    const minPrice = sortedItems[0].auction_price_per_unit;
+
+    const calculateAverage = (targetCount: number) => {
+      let currentCount = 0;
+      let totalPrice = 0;
+
+      for (const item of sortedItems) {
+        if (currentCount >= targetCount) break;
+
+        const remaining = targetCount - currentCount;
+        const countToTake = Math.min(item.item_count, remaining);
+
+        totalPrice += item.auction_price_per_unit * countToTake;
+        currentCount += countToTake;
+      }
+
+      return currentCount > 0 ? Math.floor(totalPrice / currentCount) : 0;
+    };
+
+    return {
+      minPrice,
+      avg25: calculateAverage(25),
+      avg50: calculateAverage(50),
+      avg200: calculateAverage(200),
+    };
+  }, [auctionList]);
 
   const handleRemoveItem = () => {
     if (window.confirm(`${item.name} 아이템을 삭제하시겠습니까?`)) {
@@ -174,25 +232,25 @@ export function AuctionSectionItemComponent({
             <tr className="border-b border-foreground/10">
               <td className="text-left py-0.5">최저가</td>
               <td className="text-right py-0.5 font-medium">
-                123,123,123 Gold
+                {isLoadingList ? "(Loading...)" : formatGold(stats.minPrice)}
               </td>
             </tr>
             <tr className="border-b border-foreground/10">
               <td className="text-left py-0.5">25개 평균</td>
               <td className="text-right py-0.5 font-medium">
-                123,123,123 Gold
+                {isLoadingList ? "(Loading...)" : formatGold(stats.avg25)}
               </td>
             </tr>
             <tr className="border-b border-foreground/10">
               <td className="text-left py-0.5">50개 평균</td>
               <td className="text-right py-0.5 font-medium">
-                123,123,123 Gold
+                {isLoadingList ? "(Loading...)" : formatGold(stats.avg50)}
               </td>
             </tr>
             <tr className="border-b border-foreground/10">
               <td className="text-left py-0.5">200개 평균</td>
               <td className="text-right py-0.5 font-medium">
-                123,123,123 Gold
+                {isLoadingList ? "(Loading...)" : formatGold(stats.avg200)}
               </td>
             </tr>
             <tr>
