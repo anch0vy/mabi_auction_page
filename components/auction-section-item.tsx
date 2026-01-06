@@ -125,8 +125,6 @@ export function AuctionSectionItemComponent({
         });
       });
 
-      console.log(filtered)
-
       const totalCount = filtered.reduce((acc, cur) => acc + cur.item_count, 0);
       const avgPrice =
         totalCount > 0
