@@ -1,9 +1,7 @@
 "use client";
 
-import {
-  AuctionSectionComponent,
-  AuctionSectionItemComponent,
-} from "@/components/auction-section";
+import { AuctionSectionComponent } from "@/components/auction-section";
+import { AuctionSectionItemComponent } from "@/components/auction-section-item";
 import { AuctionSectionItemAddComponent } from "@/components/auction-section-item-add";
 import { Button } from "@/components/ui/button";
 import { mabiAuctionDumpDataClient } from "@/lib/mabi-auction-dump-data-client";
