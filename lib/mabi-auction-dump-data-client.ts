@@ -1,21 +1,9 @@
 'use client';
 
 import { AuctionHistoryItem } from '@/types/common';
-import { format, isAfter, subDays, subMonths } from 'date-fns';
+import { format, isAfter, subDays } from 'date-fns';
 import { toZonedTime } from 'date-fns-tz';
 import { Semaphore } from 'es-toolkit';
-
-export interface GitHubContent {
-  name: string;
-  path: string;
-  sha: string;
-  size: number;
-  url: string;
-  html_url: string;
-  git_url: string;
-  download_url: string | null;
-  type: 'file' | 'dir';
-}
 
 export class GitHubClient {
   private readonly owner: string;
@@ -27,38 +15,6 @@ export class GitHubClient {
     this.owner = owner;
     this.repo = repo;
     this.branch = branch;
-  }
-
-  /**
-   * 특정 경로 내의 파일 목록을 가져와서 Date 객체 배열로 변환합니다.
-   */
-  async getDirectoryContents(path: string): Promise<Date[]> {
-    const url = `https://api.github.com/repos/${this.owner}/${this.repo}/contents/${path}?ref=${this.branch}`;
-
-    const response = await fetch(url, {
-      headers: {
-        Accept: 'application/vnd.github+json',
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch directory contents: ${response.statusText}`);
-    }
-
-    const contents: GitHubContent[] = await response.json();
-
-    return contents
-      .filter((item) => item.type === 'file' && item.name.endsWith('.json.gz'))
-      .map((item) => {
-        // 파일명 형식: 2024-03-20T14-00-00+09-00.json.gz
-        // Date 생성 가능 형식: 2024-03-20T14:00:00+09:00
-        const dateStr = item.name
-          .replace('.json.gz', '')
-          .replace(/(\d{2})-(\d{2})-(\d{2})\+09-00$/, '$1:$2:$3+09:00');
-        return new Date(dateStr);
-      })
-      .filter((date) => !isNaN(date.getTime()))
-      .sort((a, b) => b.getTime() - a.getTime());
   }
 
   /**
@@ -96,10 +52,16 @@ export class GitHubClient {
 
       if (cachedResponse) {
         const dateHeader = cachedResponse.headers.get('sw-cache-date');
+        const isErrorCache = cachedResponse.headers.get('sw-cache-error') === 'true';
+
         if (dateHeader) {
           const cacheDate = new Date(dateHeader);
-          const eightDaysInMs = 8 * 24 * 60 * 60 * 1000;
-          if (Date.now() - cacheDate.getTime() < eightDaysInMs) {
+          const ttl = isErrorCache ? 60 * 60 * 1000 : 8 * 24 * 60 * 60 * 1000; // 실패 시 1시간, 성공 시 8일
+
+          if (Date.now() - cacheDate.getTime() < ttl) {
+            if (isErrorCache) {
+              throw new Error(`Failed to fetch auction data (cached): ${cachedResponse.statusText}`);
+            }
             const blob = await cachedResponse.blob();
             return await this.decompressBlob(blob);
           }
@@ -108,6 +70,16 @@ export class GitHubClient {
 
       const response = await fetch(url);
       if (!response.ok) {
+        // 실패한 경우도 1시간 동안 캐싱
+        const errorResponse = new Response(null, {
+          status: response.status,
+          statusText: response.statusText,
+          headers: {
+            'sw-cache-date': new Date().toISOString(),
+            'sw-cache-error': 'true',
+          },
+        });
+        await cache.put(url, errorResponse);
         throw new Error(`Failed to fetch auction data: ${response.statusText}`);
       }
 
@@ -117,6 +89,7 @@ export class GitHubClient {
         headers: {
           ...Object.fromEntries(response.headers.entries()),
           'sw-cache-date': new Date().toISOString(),
+          'sw-cache-error': 'false',
           'Content-Type': 'application/json',
         },
       });
@@ -137,7 +110,7 @@ export class GitHubClient {
 
   /**
    * 이번 달과 지난 달의 데이터를 동기화합니다.
-   * 10일 이내의 데이터만 가져와서 시간순으로 정렬하여 반환합니다.
+   * 8일 이내의 데이터를 1시간 단위로 생성하여 가져옵니다.
    */
   async syncData(): Promise<AuctionHistoryItem[]> {
     // TODO: 나중에... r2로 데이터 옮겨서 거기서 서빙해야 함
@@ -145,22 +118,23 @@ export class GitHubClient {
     const kstNow = toZonedTime(now, 'Asia/Seoul');
     const eightDaysAgo = subDays(kstNow, 8);
 
-    const currentMonthPath = `data/${format(kstNow, 'yyyy/MM')}`;
-    const lastMonthPath = `data/${format(subMonths(kstNow, 1), 'yyyy/MM')}`;
+    // 현재 시간부터 8일 전까지 1시간 단위로 시간 배열 생성
+    const targetFiles: Date[] = [];
+    let currentIter = new Date(kstNow);
+    currentIter.setMinutes(0, 0, 0); // 정시로 맞춤
 
-    const [currentFiles, lastFiles] = await Promise.all([
-      this.getDirectoryContents(currentMonthPath).catch(() => []),
-      this.getDirectoryContents(lastMonthPath).catch(() => []),
-    ]);
-
-    const allFiles = [...currentFiles, ...lastFiles];
-    // 현재 시간으로부터 8일 이내의 파일만 필터링
-    const targetFiles = allFiles.filter((date) => isAfter(date, eightDaysAgo));
+    while (isAfter(currentIter, eightDaysAgo)) {
+      targetFiles.push(new Date(currentIter));
+      currentIter.setHours(currentIter.getHours() - 1);
+    }
 
     const dataPromises = targetFiles.map(async (date) => {
       await this.semaphore.acquire();
       try {
         return await this.getAuctionData(date);
+      } catch (error) {
+        console.error(`Failed to fetch auction data for ${date.toISOString()}:`, error);
+        return [];
       } finally {
         this.semaphore.release();
       }
