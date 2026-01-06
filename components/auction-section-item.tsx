@@ -1,5 +1,7 @@
 "use client";
 
+// TODO: auction_price_per_unit 뿐만 아니라 거래 수를 가지고 작업해야 함
+
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -40,12 +42,12 @@ export function AuctionSectionItemComponent({
   const timeSlots = useMemo(() => {
     const now = new Date();
     const currentHour = now.getHours();
-    const latestStartHour = Math.floor(currentHour / 3) * 3;
+    const latestStartHour = Math.floor(currentHour / 4) * 4;
     const slots = [];
 
-    for (let i = 7; i >= 0; i--) {
-      const slotStart = startOfHour(subHours(now, currentHour - latestStartHour + i * 3));
-      const slotEnd = subHours(slotStart, -3);
+    for (let i = 5; i >= 0; i--) {
+      const slotStart = startOfHour(subHours(now, currentHour - latestStartHour + i * 4));
+      const slotEnd = subHours(slotStart, -4);
 
       const filtered = itemHistory.filter((d) => {
         const date = parseISO(d.date_auction_buy);

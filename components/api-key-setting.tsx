@@ -13,8 +13,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { NexonClient } from "@/lib/nexon-client";
 import { useApiKeyStore } from "@/lib/store";
+import { debounce } from "es-toolkit/function";
 import { Check, Loader2, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 /**
  * 개별 API 키 입력을 관리하는 컴포넌트입니다.
@@ -33,29 +34,34 @@ function ApiKeyInput({
     "idle"
   );
 
+  const validateApiKey = useMemo(
+    () =>
+      debounce(async (apiKey: string) => {
+        try {
+          const client = new NexonClient(apiKey);
+          await client.getAuctionHistory();
+          setStatus("valid");
+        } catch (error) {
+          setStatus("invalid");
+        }
+      }, 500),
+    []
+  );
+
   useEffect(() => {
     // 입력값이 없으면 상태 초기화
     if (!value || value.trim() === "") {
       setStatus("idle");
+      validateApiKey.cancel();
       return;
     }
 
     // 입력 중임을 표시
     setStatus("validating");
+    validateApiKey(value);
 
-    // debounce 적용 (500ms)
-    const timer = setTimeout(async () => {
-      try {
-        const client = new NexonClient(value);
-        await client.getAuctionHistory();
-        setStatus("valid");
-      } catch (error) {
-        setStatus("invalid");
-      }
-    }, 500);
-
-    return () => clearTimeout(timer);
-  }, [value]);
+    return () => validateApiKey.cancel();
+  }, [value, validateApiKey]);
 
   return (
     <div className="flex items-center px-2 pb-2 relative">
