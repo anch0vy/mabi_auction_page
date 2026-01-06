@@ -1,6 +1,5 @@
 import { ApiKeySetting } from "@/components/api-key-setting";
 import type { Metadata } from "next";
-import Image from "next/image";
 import "./globals.css";
 
 export const metadata: Metadata = {
