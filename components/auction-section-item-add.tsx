@@ -31,10 +31,33 @@ export function AuctionSectionItemAddComponent({
   const [debouncedSearch, setDebouncedSearch] = useState("");
 
   useEffect(() => {
-    fetch("/items.json")
-      .then((res) => res.json())
-      .then((data) => setItems(data))
-      .catch((err) => console.error("Failed to load items:", err));
+    const loadItems = async () => {
+      const url = "/items.json";
+
+      try {
+        const cache = await caches.open("items-cache");
+        let response = await cache.match(url);
+
+        if (!response) {
+          response = await fetch(url);
+          if (response.ok) {
+            await cache.put(url, response.clone());
+          }
+        }
+
+        const data = await response.json();
+        setItems(data);
+      } catch (err) {
+        console.error("Failed to load items:", err);
+        // 캐시 실패 시 일반 fetch 시도
+        fetch(url)
+          .then((res) => res.json())
+          .then((data) => setItems(data))
+          .catch((e) => console.error("Fallback fetch failed:", e));
+      }
+    };
+
+    loadItems();
   }, []);
 
   const updateDebouncedSearch = useMemo(
