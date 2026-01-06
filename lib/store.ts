@@ -1,5 +1,4 @@
-import { AuctionItem, AuctionSection } from "@/types/common";
-import { AuctionHistoryItem } from "@/lib/mabi-auction-dump-data-client";
+import { AuctionHistoryItem, AuctionItem, AuctionSection } from "@/types/common";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 

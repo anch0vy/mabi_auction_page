@@ -98,8 +98,8 @@ export class GitHubClient {
         const dateHeader = cachedResponse.headers.get('sw-cache-date');
         if (dateHeader) {
           const cacheDate = new Date(dateHeader);
-          const tenDaysInMs = 10 * 24 * 60 * 60 * 1000;
-          if (Date.now() - cacheDate.getTime() < tenDaysInMs) {
+          const eightDaysInMs = 8 * 24 * 60 * 60 * 1000;
+          if (Date.now() - cacheDate.getTime() < eightDaysInMs) {
             const blob = await cachedResponse.blob();
             return await this.decompressBlob(blob);
           }
@@ -143,7 +143,7 @@ export class GitHubClient {
     // TODO: 나중에... r2로 데이터 옮겨서 거기서 서빙해야 함
     const now = new Date();
     const kstNow = toZonedTime(now, 'Asia/Seoul');
-    const tenDaysAgo = subDays(kstNow, 10);
+    const eightDaysAgo = subDays(kstNow, 8);
 
     const currentMonthPath = `data/${format(kstNow, 'yyyy/MM')}`;
     const lastMonthPath = `data/${format(subMonths(kstNow, 1), 'yyyy/MM')}`;
@@ -154,8 +154,8 @@ export class GitHubClient {
     ]);
 
     const allFiles = [...currentFiles, ...lastFiles];
-    // 현재 시간으로부터 10일 이내의 파일만 필터링
-    const targetFiles = allFiles.filter((date) => isAfter(date, tenDaysAgo));
+    // 현재 시간으로부터 8일 이내의 파일만 필터링
+    const targetFiles = allFiles.filter((date) => isAfter(date, eightDaysAgo));
 
     const dataPromises = targetFiles.map(async (date) => {
       await this.semaphore.acquire();

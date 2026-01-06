@@ -1,7 +1,5 @@
 "use client";
 
-// TODO: auction_price_per_unit 뿐만 아니라 거래 수를 가지고 작업해야 함
-
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -57,8 +55,10 @@ export function AuctionSectionItemComponent({
       const avgPrice =
         filtered.length > 0
           ? Math.floor(
-            filtered.reduce((acc, cur) => acc + cur.auction_price_per_unit, 0) /
-            filtered.length
+            filtered.reduce(
+              (acc, cur) => acc + cur.auction_price_per_unit * cur.item_count,
+              0
+            ) / filtered.reduce((acc, cur) => acc + cur.item_count, 0)
           )
           : 0;
 
@@ -88,8 +88,10 @@ export function AuctionSectionItemComponent({
   const avg24h = useMemo(() => {
     return history24h.length > 0
       ? Math.floor(
-        history24h.reduce((acc, cur) => acc + cur.auction_price_per_unit, 0) /
-        history24h.length
+        history24h.reduce(
+          (acc, cur) => acc + cur.auction_price_per_unit * cur.item_count,
+          0
+        ) / history24h.reduce((acc, cur) => acc + cur.item_count, 0)
       )
       : 0;
   }, [history24h]);
