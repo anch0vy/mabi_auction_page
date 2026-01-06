@@ -12,9 +12,12 @@ import {
   format,
   isWithinInterval,
   parseISO,
+  startOfDay,
   startOfHour,
+  subDays,
   subHours,
 } from "date-fns";
+import { toZonedTime } from "date-fns-tz";
 import { Trash2 } from "lucide-react";
 import { useMemo } from "react";
 
@@ -38,13 +41,16 @@ export function AuctionSectionItemComponent({
   }, [syncedData, item.name]);
 
   const timeSlots = useMemo(() => {
-    const now = new Date();
+    const kstTimeZone = "Asia/Seoul";
+    const now = toZonedTime(new Date(), kstTimeZone);
     const currentHour = now.getHours();
     const latestStartHour = Math.floor(currentHour / 4) * 4;
     const slots = [];
 
     for (let i = 5; i >= 0; i--) {
-      const slotStart = startOfHour(subHours(now, currentHour - latestStartHour + i * 4));
+      const slotStart = startOfHour(
+        subHours(now, currentHour - latestStartHour + i * 4)
+      );
       const slotEnd = subHours(slotStart, -4);
 
       const filtered = itemHistory.filter((d) => {
@@ -77,7 +83,8 @@ export function AuctionSectionItemComponent({
   }, [itemHistory]);
 
   const history24h = useMemo(() => {
-    const now = new Date();
+    const kstTimeZone = "Asia/Seoul";
+    const now = toZonedTime(new Date(), kstTimeZone);
     const twentyFourHoursAgo = subHours(now, 24);
     return itemHistory.filter((d) => {
       const date = parseISO(d.date_auction_buy);
@@ -97,18 +104,49 @@ export function AuctionSectionItemComponent({
   }, [history24h]);
 
   const dailySlots = useMemo(() => {
+    const kstTimeZone = "Asia/Seoul";
     const slots = [];
-    const now = new Date();
+    const nowKst = toZonedTime(new Date(), kstTimeZone);
+
     for (let i = 6; i >= 0; i--) {
-      const date = subHours(now, i * 24);
+      // i일 전의 KST 기준 날짜를 구함
+      const targetDate = subDays(nowKst, i);
+      // 해당 날짜의 00:00:00 (KST)
+      const dayStart = startOfDay(targetDate);
+      // 해당 날짜의 23:59:59 (KST)
+      const dayEnd = new Date(dayStart);
+      dayEnd.setHours(23, 59, 59, 999);
+
+      const filtered = itemHistory.filter((d) => {
+        const auctionDate = parseISO(d.date_auction_buy);
+        return isWithinInterval(auctionDate, {
+          start: dayStart,
+          end: dayEnd,
+        });
+      });
+
+      console.log(filtered)
+
+      const totalCount = filtered.reduce((acc, cur) => acc + cur.item_count, 0);
+      const avgPrice =
+        totalCount > 0
+          ? Math.floor(
+            filtered.reduce(
+              (acc, cur) => acc + cur.auction_price_per_unit * cur.item_count,
+              0
+            ) / totalCount
+          )
+          : 0;
+
       slots.push({
-        date: format(date, "yy.MM.dd"),
-        price: 0, // Placeholder
+        date: format(targetDate, "yy.MM.dd"),
+        price: avgPrice,
+        count: totalCount,
         key: i,
       });
     }
     return slots;
-  }, []);
+  }, [itemHistory]);
 
   const formatGold = (amount: number) => {
     return amount > 0 ? amount.toLocaleString() + " Gold" : "-";
@@ -162,7 +200,7 @@ export function AuctionSectionItemComponent({
             <tr>
               <td className="text-left py-0.5">지난 24시간 거래량</td>
               <td className="text-right py-0.5 font-medium">
-                {isSyncing ? "(Loading....)" : `${history24h.length.toLocaleString()} 건`}
+                {isSyncing ? "(Loading....)" : `${history24h.length.toLocaleString()} 개`}
               </td>
             </tr>
           </tbody>
@@ -178,6 +216,7 @@ export function AuctionSectionItemComponent({
           align="center"
           className="w-auto bg-[#F5F2E7] border-foreground border rounded-none p-0"
         >
+          {/* TODO: 이 항목이 모바일 환경에서 가로로 스크롤 되도록 하기 */}
           <div className="flex">
             <table className="text-xs text-foreground border-collapse">
               <thead>
@@ -220,15 +259,16 @@ export function AuctionSectionItemComponent({
                   </tr>
                 ))}
                 <tr>
-                    <td style={{ transform: "translateY(1px)" }} className="py-1 text-center" colSpan={5}>-</td>
-                  </tr>
+                  <td style={{ transform: "translateY(1px)" }} className="py-1 text-center" colSpan={5}>-</td>
+                </tr>
               </tbody>
             </table>
             <table className="text-xs text-foreground border-collapse border-l border-foreground">
               <thead>
                 <tr className="border-b border-foreground">
                   <th style={{ transform: "translateY(1px)" }} className="pl-2 pr-1 py-1 font-semibold text-center">날짜</th>
-                  <th style={{ transform: "translateY(1px)" }} className="pl-1 pr-2 py-1 font-semibold text-center">일일 평균 가격</th>
+                  <th style={{ transform: "translateY(1px)" }} className="px-1 py-1 font-semibold text-center">일일 평균 가격</th>
+                  <th style={{ transform: "translateY(1px)" }} className="pl-1 pr-2 py-1 font-semibold text-center">거래량</th>
                 </tr>
               </thead>
               <tbody>
@@ -243,8 +283,11 @@ export function AuctionSectionItemComponent({
                     <td style={{ transform: "translateY(1px)" }} className="pl-2 pr-1 py-1 text-center whitespace-nowrap">
                       {slot.date}
                     </td>
-                    <td style={{ transform: "translateY(1px)" }} className="pl-1 pr-2 py-1 text-center font-medium whitespace-nowrap">
+                    <td style={{ transform: "translateY(1px)" }} className="px-1 py-1 text-center font-medium whitespace-nowrap">
                       {isSyncing ? "(Loading....)" : formatGold(slot.price)}
+                    </td>
+                    <td style={{ transform: "translateY(1px)" }} className="pl-1 pr-2 py-1 text-center whitespace-nowrap">
+                      {isSyncing ? "(Loading....)" : `${slot.count.toLocaleString()}개`}
                     </td>
                   </tr>
                 ))}
