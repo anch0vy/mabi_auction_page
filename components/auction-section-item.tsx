@@ -96,6 +96,20 @@ export function AuctionSectionItemComponent({
       : 0;
   }, [history24h]);
 
+  const dailySlots = useMemo(() => {
+    const slots = [];
+    const now = new Date();
+    for (let i = 6; i >= 0; i--) {
+      const date = subHours(now, i * 24);
+      slots.push({
+        date: format(date, "yy.MM.dd"),
+        price: 0, // Placeholder
+        key: i,
+      });
+    }
+    return slots;
+  }, []);
+
   const formatGold = (amount: number) => {
     return amount > 0 ? amount.toLocaleString() + " Gold" : "-";
   };
@@ -164,50 +178,79 @@ export function AuctionSectionItemComponent({
           align="center"
           className="w-auto bg-[#F5F2E7] border-foreground border rounded-none p-0"
         >
-          <table className="text-xs text-foreground border-collapse">
-            <thead>
-              <tr className="border-b border-foreground">
-                <th style={{ transform: "translateY(1px)" }} className="pl-2 pr-1 py-1 font-semibold text-center">날짜</th>
-                <th style={{ transform: "translateY(1px)" }} className="px-1 py-1 font-semibold text-center">시작</th>
-                <th style={{ transform: "translateY(1px)" }} className="px-1 py-1 font-semibold text-center">종료</th>
-                <th style={{ transform: "translateY(1px)" }} className="pl-1 pr-2 py-1 font-semibold text-center">가격</th>
-                <th style={{ transform: "translateY(1px)" }} className="pr-2 font-semibold text-center">24H 평균</th>
-              </tr>
-            </thead>
-            <tbody>
-              {timeSlots.map((slot, index, array) => (
-                <tr
-                  key={slot.key}
-                  style={{ transform: "translateY(1px)" }}
-                  className={
-                    index !== array.length - 1 ? "border-b border-foreground" : ""
-                  }
-                >
-                  <td style={{ transform: "translateY(1px)" }} className="pl-2 pr-1 text-center whitespace-nowrap">
-                    {slot.date}
-                  </td>
-                  <td style={{ transform: "translateY(1px)" }} className="px-1 py-1 text-center whitespace-nowrap">
-                    {slot.start}
-                  </td>
-                  <td style={{ transform: "translateY(1px)" }} className="px-1 py-1 text-center whitespace-nowrap">
-                    {slot.end}
-                  </td>
-                  <td style={{ transform: "translateY(1px)" }} className="pl-1 pr-2 text-center font-medium whitespace-nowrap">
-                    {isSyncing ? "(Loading....)" : formatGold(slot.price)}
-                  </td>
-                  {index === 0 && (
-                    <td
-                      rowSpan={array.length}
-                      style={{ transform: "translateY(1px)" }}
-                      className="px-2 text-center whitespace-nowrap border-l border-foreground align-middle"
-                    >
-                      {isSyncing ? "(Loading....)" : formatGold(avg24h)}
-                    </td>
-                  )}
+          <div className="flex">
+            <table className="text-xs text-foreground border-collapse">
+              <thead>
+                <tr className="border-b border-foreground">
+                  <th style={{ transform: "translateY(1px)" }} className="pl-2 pr-1 py-1 font-semibold text-center">날짜</th>
+                  <th style={{ transform: "translateY(1px)" }} className="px-1 py-1 font-semibold text-center">시작</th>
+                  <th style={{ transform: "translateY(1px)" }} className="px-1 py-1 font-semibold text-center">종료</th>
+                  <th style={{ transform: "translateY(1px)" }} className="pl-1 pr-2 py-1 font-semibold text-center">가격</th>
+                  <th style={{ transform: "translateY(1px)" }} className="pr-2 font-semibold text-center">24H 평균</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {timeSlots.map((slot, index, array) => (
+                  <tr
+                    key={slot.key}
+                    style={{ transform: "translateY(1px)" }}
+                    className="border-b border-foreground"
+                  >
+                    <td style={{ transform: "translateY(1px)" }} className="pl-2 pr-1 text-center whitespace-nowrap">
+                      {slot.date}
+                    </td>
+                    <td style={{ transform: "translateY(1px)" }} className="px-1 py-1 text-center whitespace-nowrap">
+                      {slot.start}
+                    </td>
+                    <td style={{ transform: "translateY(1px)" }} className="px-1 py-1 text-center whitespace-nowrap">
+                      {slot.end}
+                    </td>
+                    <td style={{ transform: "translateY(1px)" }} className="pl-1 pr-2 text-center font-medium whitespace-nowrap">
+                      {isSyncing ? "(Loading....)" : formatGold(slot.price)}
+                    </td>
+                    {index === 0 && (
+                      <td
+                        rowSpan={array.length}
+                        style={{ transform: "translateY(1px)" }}
+                        className="px-2 text-center whitespace-nowrap border-l border-foreground align-middle"
+                      >
+                        {isSyncing ? "(Loading....)" : formatGold(avg24h)}
+                      </td>
+                    )}
+                  </tr>
+                ))}
+                <tr>
+                    <td style={{ transform: "translateY(1px)" }} className="py-1 text-center" colSpan={5}>-</td>
+                  </tr>
+              </tbody>
+            </table>
+            <table className="text-xs text-foreground border-collapse border-l border-foreground">
+              <thead>
+                <tr className="border-b border-foreground">
+                  <th style={{ transform: "translateY(1px)" }} className="pl-2 pr-1 py-1 font-semibold text-center">날짜</th>
+                  <th style={{ transform: "translateY(1px)" }} className="pl-1 pr-2 py-1 font-semibold text-center">일일 평균 가격</th>
+                </tr>
+              </thead>
+              <tbody>
+                {dailySlots.map((slot, index, array) => (
+                  <tr
+                    key={slot.key}
+                    style={{ transform: "translateY(1px)" }}
+                    className={
+                      index !== array.length - 1 ? "border-b border-foreground" : ""
+                    }
+                  >
+                    <td style={{ transform: "translateY(1px)" }} className="pl-2 pr-1 py-1 text-center whitespace-nowrap">
+                      {slot.date}
+                    </td>
+                    <td style={{ transform: "translateY(1px)" }} className="pl-1 pr-2 py-1 text-center font-medium whitespace-nowrap">
+                      {isSyncing ? "(Loading....)" : formatGold(slot.price)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </PopoverContent>
       </Popover>
     </div>
