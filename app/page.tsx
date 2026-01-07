@@ -28,9 +28,9 @@ export default function Page() {
       <div>
         {sections.map((section) => (
           <AuctionSectionComponent key={section.id} section={section}>
-            {section.items.map((item, index) => (
+            {section.items.map(item => (
               <AuctionSectionItemComponent
-                key={`${item.name}-${index}`}
+                key={`${item.name}`}
                 item={item}
                 sectionId={section.id}
               />
