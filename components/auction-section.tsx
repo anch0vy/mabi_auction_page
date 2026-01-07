@@ -88,16 +88,24 @@ export function AuctionSectionComponent({
           variant="link"
           size="icon"
           className="h-auto w-10 border-r border-foreground border-t-0 border-b-0 border-l-0 hover:bg-foreground/10"
-          onClick={handleRemoveSection}
+          onClick={() => moveSection(section.id, "up")}
         >
-          <Trash2 className="h-4 w-4" />
+          <ChevronUp className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="link"
+          size="icon"
+          className="h-auto w-10 hover:bg-foreground/10"
+          onClick={() => moveSection(section.id, "down")}
+        >
+          <ChevronDown className="h-4 w-4" />
         </Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
               variant="link"
               size="icon"
-              className="h-auto w-10 border-r border-foreground border-t-0 border-b-0 border-l-0 hover:bg-foreground/10"
+              className="h-auto w-10 border-l border-foreground border-t-0 border-b-0 border-r-0 hover:bg-foreground/10"
             >
               <Palette className="h-4 w-4" />
             </Button>
@@ -117,18 +125,10 @@ export function AuctionSectionComponent({
         <Button
           variant="link"
           size="icon"
-          className="h-auto w-10 border-r border-foreground border-t-0 border-b-0 border-l-0 hover:bg-foreground/10"
-          onClick={() => moveSection(section.id, "up")}
+          className="h-auto w-10 border-l border-foreground border-t-0 border-b-0 border-r-0 hover:bg-foreground/10"
+          onClick={handleRemoveSection}
         >
-          <ChevronUp className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="link"
-          size="icon"
-          className="h-auto w-10 hover:bg-foreground/10"
-          onClick={() => moveSection(section.id, "down")}
-        >
-          <ChevronDown className="h-4 w-4" />
+          <Trash2 className="h-4 w-4" />
         </Button>
       </div>
       <div className="px-2 py-2 border-foreground border border-t-0 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
