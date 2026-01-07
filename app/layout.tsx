@@ -26,10 +26,9 @@ export default function RootLayout({
           <main className="pb-2 mx-auto flex-1 w-full overflow-y-auto">
             {children}
           </main>
-          <footer className="border-t border-foreground py-2 text-[12px] w-full flex-shrink-0">
-            <div className="flex justify-end w-full mx-auto">
-              <p>만돌린 리카이시스의 사랑으로 만들어짐.</p>
-            </div>
+          <footer className="border-t border-foreground py-2 text-[12px] w-full flex-shrink-0 flex justify-between items-center">
+            <p>이 사이트는 NEXON Open API를 이용함</p>
+            <p>만돌린 리카이시스의 사랑으로 만들어짐.</p>
           </footer>
         </div>
       </body>
