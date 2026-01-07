@@ -128,18 +128,37 @@ export class GitHubClient {
       currentIter.setHours(currentIter.getHours() - 1);
     }
 
-    const dataPromises = targetFiles.map(async (date) => {
-      await this.semaphore.acquire();
-      try {
-        return await this.getAuctionData(date);
-      } catch (error) {
-        console.error(`Failed to fetch auction data for ${date.toISOString()}:`, error);
-        return [];
-      } finally {
-        this.semaphore.release();
+    const results: AuctionHistoryItem[][] = [];
+    const chunkSize = 5;
+
+    for (let i = 0; i < targetFiles.length; i += chunkSize) {
+      const chunk = targetFiles.slice(i, i + chunkSize);
+      const chunkPromises = chunk.map(async (date) => {
+        try {
+          return await this.getAuctionData(date);
+        } catch (error) {
+          console.error(`Failed to fetch auction data for ${date.toISOString()}:`, error);
+          return null;
+        }
+      });
+
+      const chunkResults = await Promise.all(chunkPromises);
+      
+      // 5개 요청이 전부 실패했는지 확인 (null인 경우 실패로 간주)
+      const allFailed = chunkResults.every((res) => res === null);
+      
+      // 성공한 데이터만 결과에 추가
+      for (const res of chunkResults) {
+        if (res !== null) {
+          results.push(res);
+        }
       }
-    });
-    const results = await Promise.all(dataPromises);
+
+      if (allFailed) {
+        console.warn(`All 5 requests failed for chunk starting at ${chunk[0].toISOString()}. Stopping further requests.`);
+        break;
+      }
+    }
 
     const flatData = results.flat();
 
