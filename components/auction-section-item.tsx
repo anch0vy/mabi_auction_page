@@ -72,13 +72,14 @@ export function AuctionSectionItemComponent({
 
   const stats = useMemo(() => {
     if (!auctionList || auctionList.length === 0) {
-      return { minPrice: 0, avg25: 0, avg50: 0, avg200: 0 };
+      return { minPrice: 0, avg25: 0, avg50: 0, avg100: 0, avg200: 0, totalCount: 0 };
     }
 
     const sortedItems = [...auctionList].sort(
       (a, b) => a.auction_price_per_unit - b.auction_price_per_unit
     );
     const minPrice = sortedItems[0].auction_price_per_unit;
+    const totalCount = auctionList.reduce((acc, cur) => acc + cur.item_count, 0);
 
     const calculateAverage = (targetCount: number) => {
       let currentCount = 0;
@@ -101,7 +102,9 @@ export function AuctionSectionItemComponent({
       minPrice,
       avg25: calculateAverage(25),
       avg50: calculateAverage(50),
+      avg100: calculateAverage(100),
       avg200: calculateAverage(200),
+      totalCount,
     };
   }, [auctionList]);
 
@@ -181,15 +184,21 @@ export function AuctionSectionItemComponent({
               </td>
             </tr>
             <tr className="border-b border-foreground/10">
-              <td className="text-left py-0.5">50개 평균</td>
+              <td className="text-left py-0.5">100개 평균</td>
               <td className="text-right py-0.5 font-medium">
-                {isLoadingList ? "(Loading...)" : formatGold(stats.avg50)}
+                {isLoadingList ? "(Loading...)" : formatGold(stats.avg100)}
               </td>
             </tr>
             <tr className="border-b border-foreground/10">
               <td className="text-left py-0.5">200개 평균</td>
               <td className="text-right py-0.5 font-medium">
                 {isLoadingList ? "(Loading...)" : formatGold(stats.avg200)}
+              </td>
+            </tr>
+            <tr className="border-b border-foreground/10">
+              <td className="text-left py-0.5">매물 총 수</td>
+              <td className="text-right py-0.5 font-medium">
+                {isLoadingList ? "(Loading...)" : `${stats.totalCount.toLocaleString()} 개`}
               </td>
             </tr>
             <tr>
