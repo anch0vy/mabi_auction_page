@@ -36,6 +36,7 @@ interface AuctionStore {
   updateItemInfo: (sectionId: string, itemName: string, info: AuctionItem) => void;
   reorderSections: (sections: AuctionSection[]) => void;
   moveSection: (sectionId: string, direction: "up" | "down") => void;
+  moveItemInSection: (sectionId: string, itemName: string, direction: "left" | "right") => void;
   updateSectionColor: (sectionId: string, color: string) => void;
   isSyncing: boolean;
   setIsSyncing: (isSyncing: boolean) => void;
@@ -134,6 +135,28 @@ export const useAuctionStore = create<AuctionStore>()(
           }
           return { sections: newSections };
         }),
+      moveItemInSection: (sectionId, itemName, direction) =>
+        set((state) => ({
+          sections: state.sections.map((s) => {
+            if (s.id !== sectionId) return s;
+            const index = s.items.findIndex((i) => i.name === itemName);
+            if (index === -1) return s;
+
+            const newItems = [...s.items];
+            if (direction === "left" && index > 0) {
+              [newItems[index - 1], newItems[index]] = [
+                newItems[index],
+                newItems[index - 1],
+              ];
+            } else if (direction === "right" && index < newItems.length - 1) {
+              [newItems[index + 1], newItems[index]] = [
+                newItems[index],
+                newItems[index + 1],
+              ];
+            }
+            return { ...s, items: newItems };
+          }),
+        })),
     }),
     {
       name: "auction-storage",
