@@ -36,4 +36,5 @@ export interface AuctionSection {
   title: string;
   items: AuctionItemData[];
   bgColor?: string;
+  isLocked: boolean;
 }

@@ -38,6 +38,7 @@ interface AuctionStore {
   moveSection: (sectionId: string, direction: "up" | "down") => void;
   moveItemInSection: (sectionId: string, itemName: string, direction: "left" | "right") => void;
   updateSectionColor: (sectionId: string, color: string) => void;
+  toggleSectionLock: (sectionId: string) => void;
   isSyncing: boolean;
   setIsSyncing: (isSyncing: boolean) => void;
   syncedData: AuctionHistoryItem[];
@@ -56,7 +57,7 @@ export const useAuctionStore = create<AuctionStore>()(
         set((state) => ({
           sections: [
             ...state.sections,
-            { id: crypto.randomUUID(), title, items: [] },
+            { id: crypto.randomUUID(), title, items: [], isLocked: false },
           ],
         })),
       removeSection: (sectionId) =>
@@ -114,6 +115,12 @@ export const useAuctionStore = create<AuctionStore>()(
         set((state) => ({
           sections: state.sections.map((s) =>
             s.id === sectionId ? { ...s, bgColor } : s
+          ),
+        })),
+      toggleSectionLock: (sectionId) =>
+        set((state) => ({
+          sections: state.sections.map((s) =>
+            s.id === sectionId ? { ...s, isLocked: !s.isLocked } : s
           ),
         })),
       moveSection: (sectionId, direction) =>

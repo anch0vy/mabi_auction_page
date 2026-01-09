@@ -17,7 +17,10 @@ export function AuctionSectionItemComponent({
   item: AuctionItemData;
   sectionId: string;
 }) {
-  const { removeItemFromSection, moveItemInSection, isSyncing, syncedData } = useAuctionStore();
+  const { sections, removeItemFromSection, moveItemInSection, isSyncing, syncedData } = useAuctionStore();
+  const section = sections.find((s) => s.id === sectionId);
+  const isLocked = section?.isLocked || false;
+
   const { apiKeys } = useApiKeyStore();
   const [auctionList, setAuctionList] = useState<AuctionItem[]>([]);
   const [isLoadingList, setIsLoadingList] = useState(false);
@@ -142,30 +145,34 @@ export function AuctionSectionItemComponent({
           <p style={{ transform: "translateY(3px)" }}>{item.name}</p>
         </div>
         <div className="flex items-stretch">
-          <Button
-            variant="link"
-            size="icon"
-            className="h-auto w-8 border-l border-t-0 border-b-0 border-r-0 border-foreground rounded-none hover:bg-foreground/10"
-            onClick={() => moveItemInSection(sectionId, item.name, "left")}
-          >
-            <ChevronLeft className="h-3.5 w-3.5" />
-          </Button>
-          <Button
-            variant="link"
-            size="icon"
-            className="h-auto w-8 border-l border-t-0 border-b-0 border-r-0 border-foreground rounded-none hover:bg-foreground/10"
-            onClick={() => moveItemInSection(sectionId, item.name, "right")}
-          >
-            <ChevronRight className="h-3.5 w-3.5" />
-          </Button>
-          <Button
-            variant="link"
-            size="icon"
-            className="h-auto w-8 border-l border-t-0 border-b-0 border-r-0 border-foreground rounded-none hover:bg-foreground/10"
-            onClick={handleRemoveItem}
-          >
-            <Trash2 className="h-3.5 w-3.5" />
-          </Button>
+          {!isLocked && (
+            <>
+              <Button
+                variant="link"
+                size="icon"
+                className="h-auto w-8 border-l border-t-0 border-b-0 border-r-0 border-foreground rounded-none hover:bg-foreground/10"
+                onClick={() => moveItemInSection(sectionId, item.name, "left")}
+              >
+                <ChevronLeft className="h-3.5 w-3.5" />
+              </Button>
+              <Button
+                variant="link"
+                size="icon"
+                className="h-auto w-8 border-l border-t-0 border-b-0 border-r-0 border-foreground rounded-none hover:bg-foreground/10"
+                onClick={() => moveItemInSection(sectionId, item.name, "right")}
+              >
+                <ChevronRight className="h-3.5 w-3.5" />
+              </Button>
+              <Button
+                variant="link"
+                size="icon"
+                className="h-auto w-8 border-l border-t-0 border-b-0 border-r-0 border-foreground rounded-none hover:bg-foreground/10"
+                onClick={handleRemoveItem}
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </Button>
+            </>
+          )}
         </div>
       </div>
       <div className="flex flex-col items-center justify-center p-2">

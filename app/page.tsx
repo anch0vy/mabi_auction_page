@@ -35,7 +35,7 @@ export default function Page() {
                 sectionId={section.id}
               />
             ))}
-            <AuctionSectionItemAddComponent sectionId={section.id} />
+            {!section.isLocked && <AuctionSectionItemAddComponent sectionId={section.id} />}
           </AuctionSectionComponent>
         ))}
       </div>

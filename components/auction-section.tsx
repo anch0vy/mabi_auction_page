@@ -9,7 +9,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { useAuctionStore } from "@/lib/store";
 import { AuctionSection } from "@/types/common";
-import { ChevronDown, ChevronUp, Palette, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronUp, Lock, Palette, Trash2, Unlock } from "lucide-react";
 import { useState } from "react";
 
 interface AuctionSectionProps {
@@ -26,6 +26,7 @@ export function AuctionSectionComponent({
     updateSectionTitle,
     moveSection,
     updateSectionColor,
+    toggleSectionLock,
   } = useAuctionStore();
 
   const [isEditing, setIsEditing] = useState(false);
@@ -122,6 +123,18 @@ export function AuctionSectionComponent({
             ))}
           </DropdownMenuContent>
         </DropdownMenu>
+        <Button
+          variant="link"
+          size="icon"
+          className="h-auto w-10 border-l border-foreground border-t-0 border-b-0 border-r-0 hover:bg-foreground/10"
+          onClick={() => toggleSectionLock(section.id)}
+        >
+          {section.isLocked ? (
+            <Lock className="h-4 w-4" style={{ transform: "scaleX(0.9)" }} />
+          ) : (
+            <Unlock className="h-4 w-4" style={{ transform: "scaleX(0.9)" }} />
+          )}
+        </Button>
         <Button
           variant="link"
           size="icon"
