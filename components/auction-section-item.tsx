@@ -18,7 +18,7 @@ import { useApiKeyStore, useAuctionStore } from "@/lib/store";
 import { AuctionItem, AuctionItemData, AuctionListResponse } from "@/types/common";
 import { isWithinInterval, parseISO, subHours } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
-import { ChevronLeft, ChevronRight, Settings, Trash2 } from "lucide-react";
+import { Calculator, ChevronLeft, ChevronRight, Settings, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 export function AuctionSectionItemComponent({
@@ -38,17 +38,23 @@ export function AuctionSectionItemComponent({
 
   const [minPrice, setMinPrice] = useState(item.minPrice?.toString() || "");
   const [maxPrice, setMaxPrice] = useState(item.maxPrice?.toString() || "");
+  const [minPriceExpr, setMinPriceExpr] = useState(item.minPriceExpr || "");
+  const [maxPriceExpr, setMaxPriceExpr] = useState(item.maxPriceExpr || "");
+  const [isMinExpr, setIsMinExpr] = useState(!!item.minPriceExpr);
+  const [isMaxExpr, setIsMaxExpr] = useState(!!item.maxPriceExpr);
 
   const handleSaveSettings = () => {
     updateItemSettings(sectionId, item.name, {
-      minPrice: minPrice ? parseInt(minPrice) : undefined,
-      maxPrice: maxPrice ? parseInt(maxPrice) : undefined,
+      minPrice: !isMinExpr && minPrice ? parseInt(minPrice) : undefined,
+      maxPrice: !isMaxExpr && maxPrice ? parseInt(maxPrice) : undefined,
+      minPriceExpr: isMinExpr ? minPriceExpr : undefined,
+      maxPriceExpr: isMaxExpr ? maxPriceExpr : undefined,
     });
   };
 
   const getPriceColor = (price: number) => {
-    if (item.minPrice && price <= item.minPrice) return "text-blue-600";
-    if (item.maxPrice && price >= item.maxPrice) return "text-red-600";
+    if (item.minPrice && price <= item.minPrice) return "text-[#2563EB]";
+    if (item.maxPrice && price >= item.maxPrice) return "text-[#DC2626]";
     return "";
   };
 
@@ -214,26 +220,66 @@ export function AuctionSectionItemComponent({
                   </DialogHeader>
                   <div className="p-4 text-sm space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="minPrice">최저가 알림 설정 (이 가격보다 낮으면 파란색)</Label>
-                      <Input
-                        id="minPrice"
-                        type="number"
-                        placeholder="가격 입력"
-                        value={minPrice}
-                        onChange={(e) => setMinPrice(e.target.value)}
-                        onBlur={handleSaveSettings}
-                      />
+                      <div className="flex items-center justify-between">
+                        <Label htmlFor="minPrice">최저가 알림 설정 (파란색)</Label>
+                        <Button
+                          variant="link"
+                          size="sm"
+                          className={`border-foreground border ${isMinExpr ? "bg-foreground/20" : ""}`}
+                          onClick={() => setIsMinExpr(!isMinExpr)}
+                        >
+                          <p style={{ transform: "translateY(1px)" }}>고급 수식 모드</p>
+                        </Button>
+                      </div>
+                      {isMinExpr ? (
+                        <Input
+                          id="minPriceExpr"
+                          placeholder="예: avg25 * 0.9"
+                          value={minPriceExpr}
+                          onChange={(e) => setMinPriceExpr(e.target.value)}
+                          onBlur={handleSaveSettings}
+                        />
+                      ) : (
+                        <Input
+                          id="minPrice"
+                          type="number"
+                          placeholder="가격 입력"
+                          value={minPrice}
+                          onChange={(e) => setMinPrice(e.target.value)}
+                          onBlur={handleSaveSettings}
+                        />
+                      )}
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="maxPrice">최고가 알림 설정 (이 가격보다 높으면 빨간색)</Label>
-                      <Input
-                        id="maxPrice"
-                        type="number"
-                        placeholder="가격 입력"
-                        value={maxPrice}
-                        onChange={(e) => setMaxPrice(e.target.value)}
-                        onBlur={handleSaveSettings}
-                      />
+                      <div className="flex items-center justify-between">
+                        <Label htmlFor="maxPrice">최고가 알림 설정 (빨간색)</Label>
+                        <Button
+                          variant="link"
+                          size="sm"
+                          className={`border-foreground border ${isMaxExpr ? "bg-foreground/20" : ""}`}
+                          onClick={() => setIsMaxExpr(!isMaxExpr)}
+                        >
+                          <p style={{ transform: "translateY(1px)" }}>고급 수식 모드</p>
+                        </Button>
+                      </div>
+                      {isMaxExpr ? (
+                        <Input
+                          id="maxPriceExpr"
+                          placeholder="예: avg25 * 1.1"
+                          value={maxPriceExpr}
+                          onChange={(e) => setMaxPriceExpr(e.target.value)}
+                          onBlur={handleSaveSettings}
+                        />
+                      ) : (
+                        <Input
+                          id="maxPrice"
+                          type="number"
+                          placeholder="가격 입력"
+                          value={maxPrice}
+                          onChange={(e) => setMaxPrice(e.target.value)}
+                          onBlur={handleSaveSettings}
+                        />
+                      )}
                     </div>
                   </div>
                   <DialogFooter className="border-foreground border-t">

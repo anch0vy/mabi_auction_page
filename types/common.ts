@@ -31,6 +31,8 @@ export interface AuctionItemData {
   lastFetched: number | null;
   minPrice?: number;
   maxPrice?: number;
+  minPriceExpr?: string;
+  maxPriceExpr?: string;
 }
 
 export interface AuctionSection {
