@@ -31,6 +31,7 @@ export default function RootLayout({
             <p>만돌린 리카이시스의 사랑으로 만들어짐.</p>
           </footer>
         </div>
+        <script type="text/javascript" src="https://openapi.nexon.com/js/analytics.js?app_id=250343" async></script>
       </body>
     </html>
   );
