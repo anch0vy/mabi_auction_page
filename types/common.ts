@@ -29,6 +29,8 @@ export interface AuctionListResponse {
 export interface AuctionItemData {
   name: string;
   lastFetched: number | null;
+  minPrice?: number;
+  maxPrice?: number;
 }
 
 export interface AuctionSection {

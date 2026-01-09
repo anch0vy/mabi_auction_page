@@ -34,6 +34,7 @@ interface AuctionStore {
   addItemToSection: (sectionId: string, itemName: string) => void;
   removeItemFromSection: (sectionId: string, itemName: string) => void;
   updateItemInfo: (sectionId: string, itemName: string, info: AuctionItem) => void;
+  updateItemSettings: (sectionId: string, itemName: string, settings: { minPrice?: number; maxPrice?: number }) => void;
   reorderSections: (sections: AuctionSection[]) => void;
   moveSection: (sectionId: string, direction: "up" | "down") => void;
   moveItemInSection: (sectionId: string, itemName: string, direction: "left" | "right") => void;
@@ -104,6 +105,21 @@ export const useAuctionStore = create<AuctionStore>()(
                   items: s.items.map((i) =>
                     i.name === itemName
                       ? { ...i, info, lastFetched: Date.now() }
+                      : i
+                  ),
+                }
+              : s
+          ),
+        })),
+      updateItemSettings: (sectionId, itemName, settings) =>
+        set((state) => ({
+          sections: state.sections.map((s) =>
+            s.id === sectionId
+              ? {
+                  ...s,
+                  items: s.items.map((i) =>
+                    i.name === itemName
+                      ? { ...i, ...settings }
                       : i
                   ),
                 }
