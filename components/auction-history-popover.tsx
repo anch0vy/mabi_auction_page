@@ -32,7 +32,7 @@ export function AuctionHistoryPopover({
   };
 
   const itemHistory = useMemo(() => {
-    return syncedData.filter((d) => d.item_name === itemName);
+    return syncedData[itemName] || [];
   }, [syncedData, itemName]);
 
   const timeSlots = useMemo(() => {

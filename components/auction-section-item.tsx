@@ -145,7 +145,7 @@ export function AuctionSectionItemComponent({
   };
 
   const itemHistory = useMemo(() => {
-    return syncedData.filter((d) => d.item_name === item.name);
+    return syncedData[item.name] || [];
   }, [syncedData, item.name]);
 
   const history24h = useMemo(() => {

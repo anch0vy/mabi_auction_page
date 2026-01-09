@@ -112,7 +112,7 @@ export class GitHubClient {
    * 이번 달과 지난 달의 데이터를 동기화합니다.
    * 8일 이내의 데이터를 1시간 단위로 생성하여 가져옵니다.
    */
-  async syncData(): Promise<AuctionHistoryItem[]> {
+  async syncData(): Promise<Record<string, AuctionHistoryItem[]>> {
     // TODO: 나중에... r2로 데이터 옮겨서 거기서 서빙해야 함
     const now = new Date();
     const kstNow = toZonedTime(now, 'Asia/Seoul');
@@ -162,10 +162,7 @@ export class GitHubClient {
 
     const flatData = results.flat();
 
-    // date_auction_buy 순으로 정렬
-    return flatData.sort(
-      (a, b) => new Date(a.date_auction_buy).getTime() - new Date(b.date_auction_buy).getTime()
-    );
+    return Object.groupBy(flatData, (item) => item.item_name) as Record<string, AuctionHistoryItem[]>;
   }
 }
 

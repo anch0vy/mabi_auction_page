@@ -42,8 +42,8 @@ interface AuctionStore {
   toggleSectionLock: (sectionId: string) => void;
   isSyncing: boolean;
   setIsSyncing: (isSyncing: boolean) => void;
-  syncedData: AuctionHistoryItem[];
-  setSyncedData: (data: AuctionHistoryItem[]) => void;
+  syncedData: Record<string, AuctionHistoryItem[]>;
+  setSyncedData: (data: Record<string, AuctionHistoryItem[]>) => void;
 }
 
 export const useAuctionStore = create<AuctionStore>()(
@@ -51,7 +51,7 @@ export const useAuctionStore = create<AuctionStore>()(
     (set) => ({
       isSyncing: false,
       setIsSyncing: (isSyncing) => set({ isSyncing }),
-      syncedData: [],
+      syncedData: {},
       setSyncedData: (syncedData) => set({ syncedData }),
       sections: [],
       addSection: (title) =>
