@@ -7,5 +7,7 @@
   ],
   "assets": {
     "directory": "out/",
-  }
+  },
+  "preview_urls": false,
+  "workers_dev": false,
 }
