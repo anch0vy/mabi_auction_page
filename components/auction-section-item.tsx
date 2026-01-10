@@ -1,6 +1,5 @@
 "use client";
 
-// https://github.com/dy/subscript 사용해서 고급 수식 모드 작성하기
 // https://codemirror.net/ 사용해서 입력받을 때 @ 처리하기
 
 import { AuctionHistoryPopover } from "@/components/auction-history-popover";
@@ -19,7 +18,8 @@ import { Label } from "@/components/ui/label";
 import { calculateAuctionStats } from "@/lib/auction-utils";
 import { NexonClient } from "@/lib/nexon-client";
 import { useApiKeyStore, useAuctionStore } from "@/lib/store";
-import { AuctionItem, AuctionItemData, AuctionListResponse } from "@/types/common";
+import { AuctionItem, AuctionItemData } from "@/types/common";
+import CodeMirror from "@uiw/react-codemirror";
 import { isWithinInterval, parseISO, subHours } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
 import { ChevronLeft, ChevronRight, Settings, Trash2 } from "lucide-react";
@@ -46,6 +46,8 @@ export function AuctionSectionItemComponent({
   const [maxPriceExpr, setMaxPriceExpr] = useState(item.maxPriceExpr || "");
   const [isMinExpr, setIsMinExpr] = useState(!!item.minPriceExpr);
   const [isMaxExpr, setIsMaxExpr] = useState(!!item.maxPriceExpr);
+  const [isMinFocused, setIsMinFocused] = useState(false);
+  const [isMaxFocused, setIsMaxFocused] = useState(false);
 
   const handleSaveSettings = () => {
     updateItemSettings(sectionId, item.name, {
@@ -106,6 +108,14 @@ export function AuctionSectionItemComponent({
 
   const formatGold = (amount: number) => {
     return amount > 0 ? amount.toLocaleString() + " Gold" : "-";
+  };
+
+  const codeMirrorClass = "dark:bg-input/30 border-input focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 disabled:bg-input/50 dark:disabled:bg-input/80 h-8 rounded-none border bg-transparent px-2.5 py-1 text-xs transition-colors file:h-6 file:text-xs file:font-medium focus-visible:ring-1 aria-invalid:ring-1 md:text-xs file:text-foreground placeholder:text-muted-foreground w-full min-w-0 outline-none file:inline-flex file:border-0 file:bg-transparent disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50";
+  const codeMirrorBasicSetup = {
+    lineNumbers: false,
+    foldGutter: false,
+    highlightActiveLine: false,
+    highlightActiveLineGutter: false,
   };
 
   return (
@@ -172,12 +182,18 @@ export function AuctionSectionItemComponent({
                         </Button>
                       </div>
                       {isMinExpr ? (
-                        <Input
+                        <CodeMirror
                           id="minPriceExpr"
-                          placeholder="예: avg25 * 0.9"
                           value={minPriceExpr}
-                          onChange={(e) => setMinPriceExpr(e.target.value)}
-                          onBlur={handleSaveSettings}
+                          placeholder="예: avg25 * 0.9"
+                          onChange={(value) => setMinPriceExpr(value)}
+                          onFocus={() => setIsMinFocused(true)}
+                          onBlur={() => {
+                            setIsMinFocused(false);
+                            handleSaveSettings();
+                          }}
+                          className={`${codeMirrorClass} ${isMinFocused ? "border-ring ring-ring/50 ring-1" : ""}`}
+                          basicSetup={codeMirrorBasicSetup}
                         />
                       ) : (
                         <Input
@@ -203,12 +219,18 @@ export function AuctionSectionItemComponent({
                         </Button>
                       </div>
                       {isMaxExpr ? (
-                        <Input
+                        <CodeMirror
                           id="maxPriceExpr"
-                          placeholder="예: avg25 * 1.1"
                           value={maxPriceExpr}
-                          onChange={(e) => setMaxPriceExpr(e.target.value)}
-                          onBlur={handleSaveSettings}
+                          placeholder="예: avg25 * 1.1"
+                          onChange={(value) => setMaxPriceExpr(value)}
+                          onFocus={() => setIsMaxFocused(true)}
+                          onBlur={() => {
+                            setIsMaxFocused(false);
+                            handleSaveSettings();
+                          }}
+                          className={`${codeMirrorClass} ${isMaxFocused ? "border-ring ring-ring/50 ring-1" : ""}`}
+                          basicSetup={codeMirrorBasicSetup}
                         />
                       ) : (
                         <Input

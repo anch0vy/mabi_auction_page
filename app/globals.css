@@ -106,7 +106,7 @@
   --ring: oklch(0.556 0 0);
   --chart-1: oklch(0.809 0.105 251.813);
   --chart-2: oklch(0.623 0.214 259.815);
-  --chart-3: oklch(0.546 0.245 262.881);
+  --chart-3: oklch(0.546 0.2n b45 262.881);
   --chart-4: oklch(0.488 0.243 264.376);
   --chart-5: oklch(0.424 0.199 265.638);
   --sidebar: oklch(0.205 0 0);
@@ -142,4 +142,15 @@ body {
   linear-gradient(to bottom, #1212120a 1px, transparent 1px);
   background-size: 16px 16px;
   background-color: #F5F2E7;
+}
+
+.cm-editor {
+  background-color: transparent;
+  .cm-line {
+    padding-left: 0;
+  }
+}
+
+.cm-focused {
+  outline: none !important;
 }
