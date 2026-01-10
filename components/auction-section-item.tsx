@@ -250,24 +250,18 @@ export function AuctionSectionItemComponent({
                 {isLoadingList ? "(Loading...)" : formatGold(stats.minPrice)}
               </td>
             </tr>
-            <tr className="border-b border-foreground/10">
-              <td className="text-left py-0.5">25개 평균</td>
-              <td className={`text-right py-0.5 font-medium ${getPriceColor(stats.avg25)}`}>
-                {isLoadingList ? "(Loading...)" : formatGold(stats.avg25)}
-              </td>
-            </tr>
-            <tr className="border-b border-foreground/10">
-              <td className="text-left py-0.5">100개 평균</td>
-              <td className={`text-right py-0.5 font-medium ${getPriceColor(stats.avg100)}`}>
-                {isLoadingList ? "(Loading...)" : formatGold(stats.avg100)}
-              </td>
-            </tr>
-            <tr className="border-b border-foreground/10">
-              <td className="text-left py-0.5">200개 평균</td>
-              <td className={`text-right py-0.5 font-medium ${getPriceColor(stats.avg200)}`}>
-                {isLoadingList ? "(Loading...)" : formatGold(stats.avg200)}
-              </td>
-            </tr>
+            {[
+              { label: "25개 평균", value: stats.avg25 },
+              { label: "100개 평균", value: stats.avg100 },
+              { label: "200개 평균", value: stats.avg200 },
+            ].map((stat) => (
+              <tr key={stat.label} className="border-b border-foreground/10">
+                <td className="text-left py-0.5">{stat.label}</td>
+                <td className={`text-right py-0.5 font-medium ${getPriceColor(stat.value)}`}>
+                  {isLoadingList ? "(Loading...)" : formatGold(stat.value)}
+                </td>
+              </tr>
+            ))}
             <tr className="border-b border-foreground/10">
               <td className="text-left py-0.5">매물 총 수</td>
               <td className="text-right py-0.5 font-medium">
