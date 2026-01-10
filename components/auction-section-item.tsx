@@ -68,36 +68,8 @@ export function AuctionSectionItemComponent({
 
       setIsLoadingList(true);
       try {
-        const cacheName = "auction-list-cache";
-        const cache = await caches.open(cacheName);
-        const cacheKey = `https://api.nexon.com/mabinogi/v1/auction/list?item_name=${encodeURIComponent(
-          item.name
-        )}`;
-
-        const cachedResponse = await cache.match(cacheKey);
-        if (cachedResponse) {
-          const cachedData = await cachedResponse.json<AuctionListResponse>();
-          const cacheTime = cachedResponse.headers.get("X-Cache-Timestamp");
-          const now = new Date().getTime();
-
-          if (cacheTime && now - parseInt(cacheTime) < 5 * 60 * 1000) {
-            setAuctionList(cachedData.auction_item);
-            setIsLoadingList(false);
-            return;
-          }
-        }
-
         const client = new NexonClient(validKeys.join(","));
         const response = await client.getAuctionList(item.name);
-
-        const blob = new Blob([JSON.stringify(response)], { type: "application/json" });
-        const newResponse = new Response(blob, {
-          headers: {
-            "Content-Type": "application/json",
-            "X-Cache-Timestamp": new Date().getTime().toString(),
-          },
-        });
-        await cache.put(cacheKey, newResponse);
 
         setAuctionList(response.auction_item);
       } catch (error) {

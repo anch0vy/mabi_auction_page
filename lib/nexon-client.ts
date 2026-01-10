@@ -71,8 +71,30 @@ export class NexonClient {
   }
 
   async getAuctionList(itemName: string): Promise<AuctionListResponse> {
+    const cacheName = "auction-list-cache";
+    const cacheKey = `${NEXON_LIST_API_URL}?item_name=${encodeURIComponent(itemName)}`;
+
+    try {
+      if (typeof caches !== "undefined") {
+        const cache = await caches.open(cacheName);
+        const cachedResponse = await cache.match(cacheKey);
+
+        if (cachedResponse) {
+          const cachedData = (await cachedResponse.json()) as AuctionListResponse;
+          const cacheTime = cachedResponse.headers.get("X-Cache-Timestamp");
+          const now = new Date().getTime();
+
+          if (cacheTime && now - parseInt(cacheTime) < 5 * 60 * 1000) {
+            return cachedData;
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Cache read error:", error);
+    }
+
     const controller = new AbortController();
-    return retry(
+    const responseData = await retry(
       async () => {
         // 기본적으로 요청 전 0.5초 대기
         await new Promise((resolve) => setTimeout(resolve, 500));
@@ -108,6 +130,26 @@ export class NexonClient {
         signal: controller.signal,
       }
     );
+
+    try {
+      if (typeof caches !== "undefined") {
+        const cache = await caches.open(cacheName);
+        const blob = new Blob([JSON.stringify(responseData)], {
+          type: "application/json",
+        });
+        const newResponse = new Response(blob, {
+          headers: {
+            "Content-Type": "application/json",
+            "X-Cache-Timestamp": new Date().getTime().toString(),
+          },
+        });
+        await cache.put(cacheKey, newResponse);
+      }
+    } catch (error) {
+      console.error("Cache write error:", error);
+    }
+
+    return responseData;
   }
 
   async searchAuctionItems(
