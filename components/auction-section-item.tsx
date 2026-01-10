@@ -1,9 +1,10 @@
 "use client";
 
+// https://github.com/dy/subscript 사용해서 고급 수식 모드 작성하기
+// https://codemirror.net/ 사용해서 입력받을 때 @ 처리하기
+
 import { AuctionHistoryPopover } from "@/components/auction-history-popover";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogClose,
@@ -13,12 +14,14 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { NexonClient } from "@/lib/nexon-client";
 import { useApiKeyStore, useAuctionStore } from "@/lib/store";
 import { AuctionItem, AuctionItemData, AuctionListResponse } from "@/types/common";
 import { isWithinInterval, parseISO, subHours } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
-import { Calculator, ChevronLeft, ChevronRight, Settings, Trash2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Settings, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 export function AuctionSectionItemComponent({
