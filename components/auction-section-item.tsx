@@ -22,8 +22,71 @@ import { AuctionItem, AuctionItemData } from "@/types/common";
 import CodeMirror from "@uiw/react-codemirror";
 import { isWithinInterval, parseISO, subHours } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
-import { ChevronLeft, ChevronRight, Settings, Trash2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, LucideIcon, Settings, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+
+const codeMirrorClass =
+  "dark:bg-input/30 border-input focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 disabled:bg-input/50 dark:disabled:bg-input/80 h-8 rounded-none border bg-transparent px-2.5 py-1 text-xs transition-colors file:h-6 file:text-xs file:font-medium focus-visible:ring-1 aria-invalid:ring-1 md:text-xs file:text-foreground placeholder:text-muted-foreground w-full min-w-0 outline-none file:inline-flex file:border-0 file:bg-transparent disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50";
+const codeMirrorBasicSetup = {
+  lineNumbers: false,
+  foldGutter: false,
+  highlightActiveLine: false,
+  highlightActiveLineGutter: false,
+};
+
+function PriceExpressionInput({
+  id,
+  value,
+  placeholder,
+  onChange,
+  onSave,
+}: {
+  id: string;
+  value: string;
+  placeholder: string;
+  onChange: (value: string) => void;
+  onSave: () => void;
+}) {
+  const [isFocused, setIsFocused] = useState(false);
+
+  return (
+    <CodeMirror
+      id={id}
+      value={value}
+      placeholder={placeholder}
+      onChange={onChange}
+      onFocus={() => setIsFocused(true)}
+      onBlur={() => {
+        setIsFocused(false);
+        onSave();
+      }}
+      className={`${codeMirrorClass} ${isFocused ? "border-ring ring-ring/50 ring-1" : ""}`}
+      indentWithTab={false}
+      basicSetup={codeMirrorBasicSetup}
+    />
+  );
+}
+
+function ActionButton({
+  onClick,
+  icon: Icon,
+  className,
+}: {
+  onClick?: () => void;
+  icon: LucideIcon;
+  className?: string;
+}) {
+  return (
+    <Button
+      variant="link"
+      size="icon"
+      className={`h-auto w-8 border-l border-t-0 border-b-0 border-r-0 border-foreground rounded-none hover:bg-foreground/10 ${className || ""}`}
+      onClick={onClick}
+    >
+      <Icon className="h-3.5 w-3.5" />
+    </Button>
+  );
+}
 
 export function AuctionSectionItemComponent({
   item,
@@ -46,8 +109,6 @@ export function AuctionSectionItemComponent({
   const [maxPriceExpr, setMaxPriceExpr] = useState(item.maxPriceExpr || "");
   const [isMinExpr, setIsMinExpr] = useState(!!item.minPriceExpr);
   const [isMaxExpr, setIsMaxExpr] = useState(!!item.maxPriceExpr);
-  const [isMinFocused, setIsMinFocused] = useState(false);
-  const [isMaxFocused, setIsMaxFocused] = useState(false);
 
   const handleSaveSettings = () => {
     updateItemSettings(sectionId, item.name, {
@@ -110,14 +171,6 @@ export function AuctionSectionItemComponent({
     return amount > 0 ? amount.toLocaleString() + " Gold" : "-";
   };
 
-  const codeMirrorClass = "dark:bg-input/30 border-input focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 disabled:bg-input/50 dark:disabled:bg-input/80 h-8 rounded-none border bg-transparent px-2.5 py-1 text-xs transition-colors file:h-6 file:text-xs file:font-medium focus-visible:ring-1 aria-invalid:ring-1 md:text-xs file:text-foreground placeholder:text-muted-foreground w-full min-w-0 outline-none file:inline-flex file:border-0 file:bg-transparent disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50";
-  const codeMirrorBasicSetup = {
-    lineNumbers: false,
-    foldGutter: false,
-    highlightActiveLine: false,
-    highlightActiveLineGutter: false,
-  };
-
   return (
     <div
       className="flex flex-col border-foreground border"
@@ -130,31 +183,17 @@ export function AuctionSectionItemComponent({
         <div className="flex items-stretch">
           {!isLocked && (
             <>
-              <Button
-                variant="link"
-                size="icon"
-                className="h-auto w-8 border-l border-t-0 border-b-0 border-r-0 border-foreground rounded-none hover:bg-foreground/10"
+              <ActionButton
+                icon={ChevronLeft}
                 onClick={() => moveItemInSection(sectionId, item.name, "left")}
-              >
-                <ChevronLeft className="h-3.5 w-3.5" />
-              </Button>
-              <Button
-                variant="link"
-                size="icon"
-                className="h-auto w-8 border-l border-t-0 border-b-0 border-r-0 border-foreground rounded-none hover:bg-foreground/10"
+              />
+              <ActionButton
+                icon={ChevronRight}
                 onClick={() => moveItemInSection(sectionId, item.name, "right")}
-              >
-                <ChevronRight className="h-3.5 w-3.5" />
-              </Button>
+              />
               <Dialog>
                 <DialogTrigger asChild>
-                  <Button
-                    variant="link"
-                    size="icon"
-                    className="h-auto w-8 border-l border-t-0 border-b-0 border-r-0 border-foreground rounded-none hover:bg-foreground/10"
-                  >
-                    <Settings className="h-3.5 w-3.5" />
-                  </Button>
+                  <ActionButton icon={Settings} />
                 </DialogTrigger>
                 <DialogContent
                   className="max-w-100 border-foreground border p-0 gap-0"
@@ -182,18 +221,12 @@ export function AuctionSectionItemComponent({
                         </Button>
                       </div>
                       {isMinExpr ? (
-                        <CodeMirror
+                        <PriceExpressionInput
                           id="minPriceExpr"
                           value={minPriceExpr}
                           placeholder="예: avg25 * 0.9"
-                          onChange={(value) => setMinPriceExpr(value)}
-                          onFocus={() => setIsMinFocused(true)}
-                          onBlur={() => {
-                            setIsMinFocused(false);
-                            handleSaveSettings();
-                          }}
-                          className={`${codeMirrorClass} ${isMinFocused ? "border-ring ring-ring/50 ring-1" : ""}`}
-                          basicSetup={codeMirrorBasicSetup}
+                          onChange={setMinPriceExpr}
+                          onSave={handleSaveSettings}
                         />
                       ) : (
                         <Input
@@ -219,18 +252,12 @@ export function AuctionSectionItemComponent({
                         </Button>
                       </div>
                       {isMaxExpr ? (
-                        <CodeMirror
+                        <PriceExpressionInput
                           id="maxPriceExpr"
                           value={maxPriceExpr}
                           placeholder="예: avg25 * 1.1"
-                          onChange={(value) => setMaxPriceExpr(value)}
-                          onFocus={() => setIsMaxFocused(true)}
-                          onBlur={() => {
-                            setIsMaxFocused(false);
-                            handleSaveSettings();
-                          }}
-                          className={`${codeMirrorClass} ${isMaxFocused ? "border-ring ring-ring/50 ring-1" : ""}`}
-                          basicSetup={codeMirrorBasicSetup}
+                          onChange={setMaxPriceExpr}
+                          onSave={handleSaveSettings}
                         />
                       ) : (
                         <Input
@@ -251,14 +278,7 @@ export function AuctionSectionItemComponent({
                   </DialogFooter>
                 </DialogContent>
               </Dialog>
-              <Button
-                variant="link"
-                size="icon"
-                className="h-auto w-8 border-l border-t-0 border-b-0 border-r-0 border-foreground rounded-none hover:bg-foreground/10"
-                onClick={handleRemoveItem}
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-              </Button>
+              <ActionButton icon={Trash2} onClick={handleRemoveItem} />
             </>
           )}
         </div>
@@ -266,13 +286,8 @@ export function AuctionSectionItemComponent({
       <div className="flex flex-col items-center justify-center p-2">
         <table className="w-full text-xs text-foreground border-collapse">
           <tbody>
-            <tr className="border-b border-foreground/10">
-              <td className="text-left py-0.5">최저가</td>
-              <td className={`text-right py-0.5 font-medium ${getPriceColor(stats.minPrice)}`}>
-                {isLoadingList ? "(Loading...)" : formatGold(stats.minPrice)}
-              </td>
-            </tr>
             {[
+              { label: "최저가", value: stats.minPrice },
               { label: "25개 평균", value: stats.avg25 },
               { label: "100개 평균", value: stats.avg100 },
               { label: "200개 평균", value: stats.avg200 },
