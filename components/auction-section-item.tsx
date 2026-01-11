@@ -24,15 +24,24 @@ import { isWithinInterval, parseISO, subHours } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
 import { ChevronLeft, ChevronRight, LucideIcon, Settings, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { EditorState } from "@codemirror/state";
+
 
 const codeMirrorClass =
-  "dark:bg-input/30 border-input focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 disabled:bg-input/50 dark:disabled:bg-input/80 h-8 rounded-none border bg-transparent px-2.5 py-1 text-xs transition-colors file:h-6 file:text-xs file:font-medium focus-visible:ring-1 aria-invalid:ring-1 md:text-xs file:text-foreground placeholder:text-muted-foreground w-full min-w-0 outline-none file:inline-flex file:border-0 file:bg-transparent disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50";
+  "dark:bg-input/30 border-input focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 disabled:bg-input/50 dark:disabled:bg-input/80 rounded-none border bg-transparent px-2.5 py-1 text-xs transition-colors file:h-6 file:text-xs file:font-medium focus-visible:ring-1 aria-invalid:ring-1 md:text-xs file:text-foreground placeholder:text-muted-foreground w-full min-w-0 outline-none file:inline-flex file:border-0 file:bg-transparent disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 [&_.cm-scroller]:overflow-x-auto";
 const codeMirrorBasicSetup = {
   lineNumbers: false,
   foldGutter: false,
   highlightActiveLine: false,
   highlightActiveLineGutter: false,
 };
+
+const limitLines = EditorState.changeFilter.of((tr) => {
+  if (!tr.docChanged) return true;
+
+  return tr.newDoc.lines <= 4;
+});
+
 
 function PriceExpressionInput({
   id,
@@ -61,8 +70,10 @@ function PriceExpressionInput({
         onSave();
       }}
       className={`${codeMirrorClass} ${isFocused ? "border-ring ring-ring/50 ring-1" : ""}`}
+      style={{ height: "5rem" }}
       indentWithTab={false}
       basicSetup={codeMirrorBasicSetup}
+      extensions={[limitLines]}
     />
   );
 }
@@ -196,7 +207,7 @@ export function AuctionSectionItemComponent({
                   <ActionButton icon={Settings} />
                 </DialogTrigger>
                 <DialogContent
-                  className="max-w-100 border-foreground border p-0 gap-0"
+                  className="max-w-100 border-foreground border p-0 gap-0 flex flex-col"
                   showCloseButton={false}
                   style={{
                     backgroundColor: "#F5F2E7",

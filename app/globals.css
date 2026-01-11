@@ -146,8 +146,9 @@ body {
 
 .cm-editor {
   background-color: transparent;
+  height: 100%;
   .cm-line {
-    padding-left: 0;
+    padding-left: 1px;
   }
 }
 
