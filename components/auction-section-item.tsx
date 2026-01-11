@@ -1,6 +1,6 @@
 "use client";
 
-// https://codemirror.net/ 사용해서 입력받을 때 @ 처리하기
+// https://github.com/dy/subscript
 
 import { AuctionHistoryPopover } from "@/components/auction-history-popover";
 import { Button } from "@/components/ui/button";
@@ -22,8 +22,9 @@ import { useApiKeyStore, useAuctionStore } from "@/lib/store";
 import { AuctionItem, AuctionItemData } from "@/types/common";
 import { autocompletion, CompletionContext, CompletionResult, startCompletion } from "@codemirror/autocomplete";
 import { EditorState } from "@codemirror/state";
-import { keymap } from "@codemirror/view";
+import { Decoration, DecorationSet, keymap, ViewPlugin, ViewUpdate } from "@codemirror/view";
 import CodeMirror from "@uiw/react-codemirror";
+import CryptoJS from "crypto-js";
 import { isWithinInterval, parseISO, subHours } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
 import { ChevronLeft, ChevronRight, LucideIcon, Settings, Trash2 } from "lucide-react";
@@ -44,6 +45,65 @@ const limitLines = EditorState.changeFilter.of((tr) => {
 
   return tr.newDoc.lines <= 4;
 });
+
+const itemHighlightExtension = ViewPlugin.fromClass(
+  class {
+    decorations: DecorationSet;
+
+    constructor(view: any) {
+      this.decorations = Decoration.none;
+      this.updateDecorations(view);
+    }
+
+    update(update: ViewUpdate) {
+      if (update.docChanged || update.viewportChanged) {
+        this.updateDecorations(update.view);
+      }
+    }
+
+    updateDecorations(view: any) {
+      const ranges = [];
+
+      for (const { from, to } of view.visibleRanges) {
+        const text = view.state.doc.sliceString(from, to);
+
+        // ...내용... 패턴 찾기
+        const regex = /@"(.+?)"/g;
+        let match;
+
+        while ((match = regex.exec(text)) !== null) {
+          const content = match[1];
+          const contentLength = content.length;
+
+          const start = from + match.index;
+          const end = start + contentLength + 3;
+
+          // content를 기반으로 색상 결정
+          const colors = ["#FFF2B3", "#DFF3E3", "#DDEEFF", "#E9E2FF", "#FFE2D2"];
+          const hash = CryptoJS.MD5(content).toString();
+          const hashInt = parseInt(hash.substring(0, 8), 16);
+          const colorIndex = Math.abs(hashInt) % colors.length;
+          const deco = Decoration.mark({
+            attributes: { style: `
+              background-color: ${colors[colorIndex]};
+              border-style: solid;
+              border-width: 1px;
+              border-color: #12121240;
+              padding: 1px;
+            ` },
+          });
+
+          ranges.push(deco.range(start, end));
+        }
+      }
+
+      this.decorations = Decoration.set(ranges, true);
+    }
+  },
+  {
+    decorations: (v) => v.decorations,
+  }
+);
 
 const atTriggerKeymap = keymap.of([
   {
@@ -84,19 +144,19 @@ const itemCompletionSource = async (context: CompletionContext): Promise<Complet
 
   const items = await getItems();
   const searchTerm = word.text;
-  console.log(searchTerm)
 
   const options = items
     .filter((item) => item.toLowerCase().includes(searchTerm))
     .slice(0, 10)
-    .map((item) => ({
-      label: item,
-      displayLabel: item,
-      type: "variable",
-      apply: `${JSON.stringify(item)}`,
-    }));
-  
-  console.log(options)  // 정상적으로 로그 찍힘
+    .map((item) => {
+      const hasAtPrefix = context.state.doc.sliceString(word.from - 1, word.from) === "@";
+      return {
+        label: item,
+        displayLabel: item,
+        type: "variable",
+        apply: `${hasAtPrefix ? "" : "@"}${JSON.stringify(item)}`,
+      };
+    });
 
   return {
     from: word.from,
@@ -137,6 +197,7 @@ function PriceExpressionInput({
       extensions={[
         limitLines,
         atTriggerKeymap,
+        itemHighlightExtension,
         autocompletion({
           override: [itemCompletionSource],
           optionClass: () => "bg-[#F5F2E7]",
