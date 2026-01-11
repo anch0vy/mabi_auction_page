@@ -14,6 +14,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { loadItems } from "@/lib/items";
 import { useAuctionStore } from "@/lib/store";
 import { debounce } from "es-toolkit/function";
 import { Plus } from "lucide-react";
@@ -31,57 +32,9 @@ export function AuctionSectionItemAddComponent({
   const [debouncedSearch, setDebouncedSearch] = useState("");
 
   useEffect(() => {
-    const loadItems = async () => {
-      const url = "/items.json";
-      const CACHE_NAME = "items-cache";
-      const ONE_DAY = 24 * 60 * 60 * 1000;
-
-      try {
-        const cache = await caches.open(CACHE_NAME);
-        const cachedResponse = await cache.match(url);
-
-        if (cachedResponse) {
-          const cachedDate = cachedResponse.headers.get("X-Cache-Date");
-          if (cachedDate) {
-            const isExpired =
-              Date.now() - new Date(cachedDate).getTime() > ONE_DAY;
-            if (!isExpired) {
-              const data = await cachedResponse.json<string[]>();
-              setItems(data);
-              return;
-            }
-          }
-          await cache.delete(url);
-        }
-
-        const response = await fetch(url);
-        if (response.ok) {
-          const data = await response.json<string[]>();
-          setItems(data);
-
-          // 캐시 날짜 헤더를 추가한 새로운 응답 생성
-          const headers = new Headers(response.headers);
-          headers.append("X-Cache-Date", new Date().toISOString());
-
-          const responseToCache = new Response(JSON.stringify(data), {
-            status: response.status,
-            statusText: response.statusText,
-            headers: headers,
-          });
-
-          await cache.put(url, responseToCache);
-        }
-      } catch (err) {
-        console.error("Failed to load items:", err);
-        // 캐시 실패 시 일반 fetch 시도
-        fetch(url)
-          .then((res) => res.json<string[]>())
-          .then((data) => setItems(data))
-          .catch((e) => console.error("Fallback fetch failed:", e));
-      }
-    };
-
-    loadItems();
+    loadItems()
+      .then(setItems)
+      .catch((err) => console.error("Failed to load items:", err));
   }, []);
 
   const updateDebouncedSearch = useMemo(
