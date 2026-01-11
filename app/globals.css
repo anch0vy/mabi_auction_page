@@ -150,6 +150,10 @@ body {
   .cm-line {
     padding-left: 1px;
   }
+  li[aria-selected] {
+    @apply !bg-foreground/10;
+    color: black !important
+  }
 }
 
 .cm-focused {

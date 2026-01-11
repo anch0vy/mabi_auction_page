@@ -16,15 +16,18 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { calculateAuctionStats } from "@/lib/auction-utils";
+import { loadItems } from "@/lib/items";
 import { NexonClient } from "@/lib/nexon-client";
 import { useApiKeyStore, useAuctionStore } from "@/lib/store";
 import { AuctionItem, AuctionItemData } from "@/types/common";
+import { autocompletion, CompletionContext, CompletionResult, startCompletion } from "@codemirror/autocomplete";
+import { EditorState } from "@codemirror/state";
+import { keymap } from "@codemirror/view";
 import CodeMirror from "@uiw/react-codemirror";
 import { isWithinInterval, parseISO, subHours } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
 import { ChevronLeft, ChevronRight, LucideIcon, Settings, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { EditorState } from "@codemirror/state";
 
 
 const codeMirrorClass =
@@ -42,6 +45,64 @@ const limitLines = EditorState.changeFilter.of((tr) => {
   return tr.newDoc.lines <= 4;
 });
 
+const atTriggerKeymap = keymap.of([
+  {
+    key: "@",
+    run: (view) => {
+      const range = view.state.selection.main;
+
+      view.dispatch({
+        changes: { from: range.from, to: range.to, insert: "@" },
+        selection: { anchor: range.from + 1 },
+      });
+
+      view.focus();
+      queueMicrotask(() => startCompletion(view));
+
+      // startCompletion(view);
+      return true;
+    },
+  },
+]);
+
+
+// 아이템 목록을 미리 로드하고 검색하는 함수
+let cachedItems: string[] = [];
+const getItems = async () => {
+  if (cachedItems.length === 0) {
+    cachedItems = await loadItems();
+  }
+  return cachedItems;
+};
+
+
+const itemCompletionSource = async (context: CompletionContext): Promise<CompletionResult | null> => {
+  // @ 뒤에 공백을 포함한 한글, 영문, 숫자 등을 매칭 (단, 줄바꿈은 제외)
+  const word = context.matchBefore(/[^@\n]*/);
+  if (!word) return null;
+  if (word.from === word.to && !context.explicit) return null;
+
+  const items = await getItems();
+  const searchTerm = word.text;
+  console.log(searchTerm)
+
+  const options = items
+    .filter((item) => item.toLowerCase().includes(searchTerm))
+    .slice(0, 10)
+    .map((item) => ({
+      label: item,
+      displayLabel: item,
+      type: "variable",
+      apply: `${JSON.stringify(item)}`,
+    }));
+  
+  console.log(options)  // 정상적으로 로그 찍힘
+
+  return {
+    from: word.from,
+    options,
+  };
+};
 
 function PriceExpressionInput({
   id,
@@ -73,7 +134,15 @@ function PriceExpressionInput({
       style={{ height: "5rem" }}
       indentWithTab={false}
       basicSetup={codeMirrorBasicSetup}
-      extensions={[limitLines]}
+      extensions={[
+        limitLines,
+        atTriggerKeymap,
+        autocompletion({
+          override: [itemCompletionSource],
+          optionClass: () => "bg-[#F5F2E7]",
+          icons: false,
+        })
+      ]}
     />
   );
 }
@@ -106,7 +175,14 @@ export function AuctionSectionItemComponent({
   item: AuctionItemData;
   sectionId: string;
 }) {
-  const { sections, removeItemFromSection, moveItemInSection, isSyncing, syncedData, updateItemSettings } = useAuctionStore();
+  const {
+    sections,
+    removeItemFromSection,
+    moveItemInSection,
+    isSyncing,
+    syncedData,
+    updateItemSettings,
+  } = useAuctionStore();
   const section = sections.find((s) => s.id === sectionId);
   const isLocked = section?.isLocked || false;
 
@@ -183,10 +259,7 @@ export function AuctionSectionItemComponent({
   };
 
   return (
-    <div
-      className="flex flex-col border-foreground border"
-      style={{ backgroundColor: "#F5F2E7" }}
-    >
+    <div className="flex flex-col border-foreground border" style={{ backgroundColor: "#F5F2E7" }}>
       <div className="flex items-stretch justify-between border-b border-foreground">
         <div className="px-2 py-1 flex items-center font-medium text-sm truncate">
           <p style={{ transform: "translateY(3px)" }}>{item.name}</p>
