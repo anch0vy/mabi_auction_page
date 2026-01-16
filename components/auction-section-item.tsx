@@ -245,20 +245,23 @@ export function AuctionSectionItemComponent({
 
                   {isExprFocused && (
                     <div
-                      className="absolute left-full ml-6 w-32 border border-foreground p-4 animate-in fade-in slide-in-from-left-2 duration-200 shadow-lg self-start"
+                      className="flex flex-col absolute left-full ml-6 w-48 border border-foreground shadow-lg self-start"
                       style={{
                         backgroundColor: "#F5F2E7",
                       }}
                     >
-                      <h3 className="font-bold mb-2 border-b border-foreground/20 pb-1 text-sm">
-                        수식 실행 결과
+                      <h3 className="border-foreground border-b p-2">
+                        <p
+                          className="font-bold"
+                          style={{ transform: "translateY(0px)" }}
+                        >수식 실행 결과</p>
                       </h3>
-                      <table className="w-full text-xs">
+                      <table className="m-2">
                         <tbody>
-                          {["최저가", "25개 평균", "100개 평균", "200개 평균"].map(label => (
-                            <tr key={label} className="border-b border-foreground/5">
-                              <td className="py-1 font-mono text-[10px]">{label}</td>
-                              <td className="py-1 font-mono text-[10px]">1234</td>
+                          {["최저가", "25개 평균", "100개 평균", "200개 평균"].map((label, index) => (
+                            <tr key={label} className={index === 3 ? "" : "border-b border-foreground/10"}>
+                              <td className="text-left py-0.5">{label}</td>
+                              <td className="text-right py-0.5">1234</td>
                             </tr>
                           ))}
                         </tbody>
