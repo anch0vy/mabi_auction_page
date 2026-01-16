@@ -138,7 +138,7 @@ export function AuctionSectionItemComponent({
   return (
     <div className="flex flex-col border-foreground border" style={{ backgroundColor: "#F5F2E7" }}>
       <div className="flex items-stretch justify-between border-b border-foreground">
-        <div className="px-2 py-1 flex items-center font-medium text-sm truncate">
+        <div className="px-2 py-1 flex items-center font-bold text-sm truncate">
           <p style={{ transform: "translateY(3px)" }}>{item.name}</p>
         </div>
         <div className="flex items-stretch">
@@ -164,7 +164,7 @@ export function AuctionSectionItemComponent({
                     }}
                   >
                     <DialogHeader className="border-foreground border-b p-2">
-                      <DialogTitle style={{ transform: "translateY(2px)" }}>
+                      <DialogTitle className="font-bold" style={{ transform: "translateY(2px)" }}>
                         {item.name} 설정
                       </DialogTitle>
                     </DialogHeader>
