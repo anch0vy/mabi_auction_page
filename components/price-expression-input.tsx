@@ -157,6 +157,7 @@ export function PriceExpressionInput({
   onSave: () => void;
 }) {
   const [isFocused, setIsFocused] = useState(false);
+  const [isValid, setIsValid] = useState(true);
   const { apiKeys } = useApiKeyStore();
 
   const handleChange = async (val: string) => {
@@ -195,7 +196,7 @@ export function PriceExpressionInput({
             try {
               const response = await client.getAuctionList(itemName);
               const stats = calculateAuctionStats(response.auction_item);
-              
+
               priceTypes.forEach(type => {
                 varsMap[type][varName] = stats[type];
               });
@@ -219,9 +220,11 @@ export function PriceExpressionInput({
         const result = fn(varsMap[type]);
         console.log(`Result (${type}):`, result);
       });
+      setIsValid(true);
     } catch (e) {
       // 수식이 불완전할 때 에러 발생 가능
-      console.log(e)
+      console.log(e);
+      setIsValid(false);
     }
     onChange(val);
   };
@@ -237,7 +240,15 @@ export function PriceExpressionInput({
         setIsFocused(false);
         onSave();
       }}
-      className={`${codeMirrorClass} ${isFocused ? "border-ring ring-ring/50 ring-1" : ""}`}
+      className={`${codeMirrorClass} ${isFocused
+        ? isValid
+          ? "border-ring ring-ring"
+          : "border-destructive/50! ring-0!"
+        : !isValid
+          ? "border-destructive/50! ring-0!"
+          : ""
+        }`}
+      aria-invalid={!isValid}
       style={{ height: "5rem" }}
       indentWithTab={false}
       basicSetup={codeMirrorBasicSetup}
