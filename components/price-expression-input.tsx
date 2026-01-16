@@ -149,12 +149,16 @@ export function PriceExpressionInput({
   placeholder,
   onChange,
   onSave,
+  onFocus,
+  onBlur,
 }: {
   id: string;
   value: string;
   placeholder: string;
   onChange: (value: string) => void;
   onSave: () => void;
+  onFocus?: () => void;
+  onBlur?: () => void;
 }) {
   const [isFocused, setIsFocused] = useState(false);
   const [isValid, setIsValid] = useState(true);
@@ -235,9 +239,13 @@ export function PriceExpressionInput({
       value={value}
       placeholder={placeholder}
       onChange={handleChange}
-      onFocus={() => setIsFocused(true)}
+      onFocus={() => {
+        setIsFocused(true);
+        onFocus?.();
+      }}
       onBlur={() => {
         setIsFocused(false);
+        onBlur?.();
         onSave();
       }}
       className={`${codeMirrorClass} ${isFocused

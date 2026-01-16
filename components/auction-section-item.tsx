@@ -72,6 +72,7 @@ export function AuctionSectionItemComponent({
   const [maxPriceExpr, setMaxPriceExpr] = useState(item.maxPriceExpr || "");
   const [isMinExpr, setIsMinExpr] = useState(!!item.minPriceExpr);
   const [isMaxExpr, setIsMaxExpr] = useState(!!item.maxPriceExpr);
+  const [isExprFocused, setIsExprFocused] = useState(false);
 
   const handleSaveSettings = () => {
     updateItemSettings(sectionId, item.name, {
@@ -155,87 +156,115 @@ export function AuctionSectionItemComponent({
                 <DialogTrigger asChild>
                   <ActionButton icon={Settings} />
                 </DialogTrigger>
-                <DialogContent
-                  className="max-w-100 border-foreground border p-0 gap-0 flex flex-col"
-                  showCloseButton={false}
-                  style={{
-                    backgroundColor: "#F5F2E7",
-                  }}
-                >
-                  <DialogHeader className="border-foreground border-b p-2">
-                    <DialogTitle style={{ transform: "translateY(2px)" }}>
-                      {item.name} 설정
-                    </DialogTitle>
-                  </DialogHeader>
-                  <div className="p-4 text-sm space-y-4">
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <Label htmlFor="minPrice">최저가 알림 설정 (파란색)</Label>
-                        <Button
-                          variant="link"
-                          size="sm"
-                          className={`border-foreground border ${isMinExpr ? "bg-foreground/20" : ""}`}
-                          onClick={() => setIsMinExpr(!isMinExpr)}
-                        >
-                          <p style={{ transform: "translateY(1px)" }}>고급 수식 모드</p>
-                        </Button>
+                <DialogContent className="p-0" showCloseButton={false}>
+                  <div
+                    className="w-100 border-foreground border flex flex-col shadow-lg shrink-0"
+                    style={{
+                      backgroundColor: "#F5F2E7",
+                    }}
+                  >
+                    <DialogHeader className="border-foreground border-b p-2">
+                      <DialogTitle style={{ transform: "translateY(2px)" }}>
+                        {item.name} 설정
+                      </DialogTitle>
+                    </DialogHeader>
+                    <div className="p-4 text-sm space-y-4">
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <Label htmlFor="minPrice">최저가 알림 설정 (파란색)</Label>
+                          <Button
+                            variant="link"
+                            size="sm"
+                            className={`border-foreground border ${isMinExpr ? "bg-foreground/20" : ""}`}
+                            onClick={() => setIsMinExpr(!isMinExpr)}
+                          >
+                            <p style={{ transform: "translateY(1px)" }}>고급 수식 모드</p>
+                          </Button>
+                        </div>
+                        {isMinExpr ? (
+                          <PriceExpressionInput
+                            id="minPriceExpr"
+                            value={minPriceExpr}
+                            placeholder="예: avg25 * 0.9"
+                            onChange={setMinPriceExpr}
+                            onSave={handleSaveSettings}
+                            onFocus={() => setIsExprFocused(true)}
+                            onBlur={() => setIsExprFocused(false)}
+                          />
+                        ) : (
+                          <Input
+                            id="minPrice"
+                            type="number"
+                            placeholder="가격 입력"
+                            value={minPrice}
+                            onChange={(e) => setMinPrice(e.target.value)}
+                            onBlur={handleSaveSettings}
+                          />
+                        )}
                       </div>
-                      {isMinExpr ? (
-                        <PriceExpressionInput
-                          id="minPriceExpr"
-                          value={minPriceExpr}
-                          placeholder="예: avg25 * 0.9"
-                          onChange={setMinPriceExpr}
-                          onSave={handleSaveSettings}
-                        />
-                      ) : (
-                        <Input
-                          id="minPrice"
-                          type="number"
-                          placeholder="가격 입력"
-                          value={minPrice}
-                          onChange={(e) => setMinPrice(e.target.value)}
-                          onBlur={handleSaveSettings}
-                        />
-                      )}
-                    </div>
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <Label htmlFor="maxPrice">최고가 알림 설정 (빨간색)</Label>
-                        <Button
-                          variant="link"
-                          size="sm"
-                          className={`border-foreground border ${isMaxExpr ? "bg-foreground/20" : ""}`}
-                          onClick={() => setIsMaxExpr(!isMaxExpr)}
-                        >
-                          <p style={{ transform: "translateY(1px)" }}>고급 수식 모드</p>
-                        </Button>
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <Label htmlFor="maxPrice">최고가 알림 설정 (빨간색)</Label>
+                          <Button
+                            variant="link"
+                            size="sm"
+                            className={`border-foreground border ${isMaxExpr ? "bg-foreground/20" : ""}`}
+                            onClick={() => setIsMaxExpr(!isMaxExpr)}
+                          >
+                            <p style={{ transform: "translateY(1px)" }}>고급 수식 모드</p>
+                          </Button>
+                        </div>
+                        {isMaxExpr ? (
+                          <PriceExpressionInput
+                            id="maxPriceExpr"
+                            value={maxPriceExpr}
+                            placeholder="예: avg25 * 1.1"
+                            onChange={setMaxPriceExpr}
+                            onSave={handleSaveSettings}
+                            onFocus={() => setIsExprFocused(true)}
+                            onBlur={() => setIsExprFocused(false)}
+                          />
+                        ) : (
+                          <Input
+                            id="maxPrice"
+                            type="number"
+                            placeholder="가격 입력"
+                            value={maxPrice}
+                            onChange={(e) => setMaxPrice(e.target.value)}
+                            onBlur={handleSaveSettings}
+                          />
+                        )}
                       </div>
-                      {isMaxExpr ? (
-                        <PriceExpressionInput
-                          id="maxPriceExpr"
-                          value={maxPriceExpr}
-                          placeholder="예: avg25 * 1.1"
-                          onChange={setMaxPriceExpr}
-                          onSave={handleSaveSettings}
-                        />
-                      ) : (
-                        <Input
-                          id="maxPrice"
-                          type="number"
-                          placeholder="가격 입력"
-                          value={maxPrice}
-                          onChange={(e) => setMaxPrice(e.target.value)}
-                          onBlur={handleSaveSettings}
-                        />
-                      )}
                     </div>
+                    <DialogFooter className="border-foreground border-t">
+                      <DialogClose className="px-2 py-2">
+                        <p style={{ transform: "translateY(2px)" }}>닫기</p>
+                      </DialogClose>
+                    </DialogFooter>
                   </div>
-                  <DialogFooter className="border-foreground border-t">
-                    <DialogClose className="px-2 py-2">
-                      <p style={{ transform: "translateY(2px)" }}>닫기</p>
-                    </DialogClose>
-                  </DialogFooter>
+
+                  {isExprFocused && (
+                    <div
+                      className="absolute left-full ml-6 w-32 border border-foreground p-4 animate-in fade-in slide-in-from-left-2 duration-200 shadow-lg self-start"
+                      style={{
+                        backgroundColor: "#F5F2E7",
+                      }}
+                    >
+                      <h3 className="font-bold mb-2 border-b border-foreground/20 pb-1 text-sm">
+                        수식 실행 결과
+                      </h3>
+                      <table className="w-full text-xs">
+                        <tbody>
+                          {["최저가", "25개 평균", "100개 평균", "200개 평균"].map(label => (
+                            <tr key={label} className="border-b border-foreground/5">
+                              <td className="py-1 font-mono text-[10px]">{label}</td>
+                              <td className="py-1 font-mono text-[10px]">1234</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
                 </DialogContent>
               </Dialog>
               <ActionButton icon={Trash2} onClick={handleRemoveItem} />
