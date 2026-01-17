@@ -72,7 +72,9 @@ export function AuctionSectionItemComponent({
   const [maxPriceExpr, setMaxPriceExpr] = useState(item.maxPriceExpr || "");
   const [isMinExpr, setIsMinExpr] = useState(!!item.minPriceExpr);
   const [isMaxExpr, setIsMaxExpr] = useState(!!item.maxPriceExpr);
-  const [isExprFocused, setIsExprFocused] = useState(false);
+  const [focusedInput, setFocusedInput] = useState<"min" | "max" | null>(null);
+  const [minPriceResults, setMinPriceResults] = useState<Record<string, number>>({});
+  const [maxPriceResults, setMaxPriceResults] = useState<Record<string, number>>({});
 
   const handleSaveSettings = () => {
     updateItemSettings(sectionId, item.name, {
@@ -188,8 +190,9 @@ export function AuctionSectionItemComponent({
                             placeholder="예: avg25 * 0.9"
                             onChange={setMinPriceExpr}
                             onSave={handleSaveSettings}
-                            onFocus={() => setIsExprFocused(true)}
-                            onBlur={() => setIsExprFocused(false)}
+                            onFocus={() => setFocusedInput("min")}
+                            onBlur={() => setFocusedInput(null)}
+                            onResultChange={setMinPriceResults}
                           />
                         ) : (
                           <Input
@@ -221,8 +224,9 @@ export function AuctionSectionItemComponent({
                             placeholder="예: avg25 * 1.1"
                             onChange={setMaxPriceExpr}
                             onSave={handleSaveSettings}
-                            onFocus={() => setIsExprFocused(true)}
-                            onBlur={() => setIsExprFocused(false)}
+                            onFocus={() => setFocusedInput("max")}
+                            onBlur={() => setFocusedInput(null)}
+                            onResultChange={setMaxPriceResults}
                           />
                         ) : (
                           <Input
@@ -243,7 +247,7 @@ export function AuctionSectionItemComponent({
                     </DialogFooter>
                   </div>
 
-                  {isExprFocused && (
+                  {focusedInput && (
                     <div
                       className="flex flex-col absolute left-full ml-6 w-48 border border-foreground shadow-lg self-start"
                       style={{
@@ -258,12 +262,23 @@ export function AuctionSectionItemComponent({
                       </h3>
                       <table className="m-2">
                         <tbody>
-                          {["최저가", "25개 평균", "100개 평균", "200개 평균"].map((label, index) => (
-                            <tr key={label} className={index === 3 ? "" : "border-b border-foreground/10"}>
-                              <td className="text-left py-0.5">{label}</td>
-                              <td className="text-right py-0.5">1234</td>
-                            </tr>
-                          ))}
+                          {[
+                            { label: "최저가", key: "minPrice" },
+                            { label: "25개 평균", key: "avg25" },
+                            { label: "100개 평균", key: "avg100" },
+                            { label: "200개 평균", key: "avg200" },
+                          ].map(({ label, key }, index) => {
+                            const results = focusedInput === "min" ? minPriceResults : maxPriceResults;
+                            const value = results[key];
+                            return (
+                              <tr key={label} className={index === 3 ? "" : "border-b border-foreground/10"}>
+                                <td className="text-left py-0.5">{label}</td>
+                                <td className="text-right py-0.5">
+                                  {value !== undefined && !isNaN(value) ? Math.floor(value * 100) / 100 : "-"}
+                                </td>
+                              </tr>
+                            );
+                          })}
                         </tbody>
                       </table>
                     </div>

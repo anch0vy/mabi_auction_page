@@ -9,7 +9,7 @@ import { EditorState } from "@codemirror/state";
 import { Decoration, DecorationSet, keymap, ViewPlugin, ViewUpdate } from "@codemirror/view";
 import CodeMirror from "@uiw/react-codemirror";
 import CryptoJS from "crypto-js";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import subscript from "subscript";
 
 const codeMirrorClass =
@@ -151,6 +151,7 @@ export function PriceExpressionInput({
   onSave,
   onFocus,
   onBlur,
+  onResultChange,
 }: {
   id: string;
   value: string;
@@ -159,12 +160,13 @@ export function PriceExpressionInput({
   onSave: () => void;
   onFocus?: () => void;
   onBlur?: () => void;
+  onResultChange?: (results: Record<string, number>) => void;
 }) {
   const [isFocused, setIsFocused] = useState(false);
   const [isValid, setIsValid] = useState(true);
   const { apiKeys } = useApiKeyStore();
 
-  const handleChange = async (val: string) => {
+  const processExpression = async (val: string) => {
     try {
       // 아이템 이름 매핑 정보 (변수명 -> 실제 아이템 이름)
       const itemMap: Record<string, string> = {};
@@ -220,18 +222,29 @@ export function PriceExpressionInput({
         });
       }
 
+      const results: Record<string, number> = {};
       priceTypes.forEach(type => {
         const result = fn(varsMap[type]);
         console.log(`Result (${type}):`, result);
+        results[type] = result;
       });
+      onResultChange?.(results);
       setIsValid(true);
     } catch (e) {
       // 수식이 불완전할 때 에러 발생 가능
       console.log(e);
       setIsValid(false);
     }
+  };
+
+  const handleChange = (val: string) => {
+    processExpression(val);
     onChange(val);
   };
+
+  useEffect(() => {
+    processExpression(value);
+  }, []);
 
   return (
     <CodeMirror
